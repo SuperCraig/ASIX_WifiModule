@@ -1,0 +1,231 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Advanced</title>
+<link href="axcss0.css" rel="stylesheet" type="text/css" />
+</head>
+<body onClick="closeDialog();">
+<table id="head">
+<tr><td class="utt"><a href="http://www.asix.com.tw" target="mainFrame">http://www.asix.com.tw</a></td></tr>
+<tr><td id="mimg">
+<img src="img/Logo.jpg" alt="" width="67" height="62" />
+<img src="img/asix.gif" alt="" width="95" height="24" id="asix"/>
+<span id="corp">ELECTRONICS CORPORATION</span>
+<span id="devname">AXM23001 RS-232 to WiFi</span>
+</td></tr>
+<tr><td class="utt"><a href="index.htm">Logout</a></td></tr>
+<tr><td class="nvg">
+<ul>
+<li><a href="basic.htm">Basic</a></li>
+<li id="fucs"><a href="advanced.htm">Advanced</a></li>
+<li><a href="security.htm">Security</a></li>
+<li><a href="wifi.htm">WiFi</a></li>
+<li><a href="wifi_wz.htm">WiFi Wizard</a></li>
+<li><a href="rtc.htm">RTC</a></li>
+<li><a href="status.htm">Status</a></li>
+</ul>
+</td></tr>
+</table>
+<table id="ctent">
+<form method="POST" enctype="multipart/form-data" id="ugr_frm">
+<tr><td><div>Firmware Upgrade</div></td></tr>
+<tr><td><label>Image path:</label><input name="img_path" type="file" value="" style="width:50%; border:1px outset; background-color:#ffffff;" accept=".bin"/></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Please specify the image file path for firmware upgrade.</td></tr>
+<tr><td class="btn">
+<input id="ugr_smt" name="Upgrade" type="submit" value="Upgrade" style="display:none;"/>
+<input id="ugr_btn" name="Upgrade" type="button" value="Upgrade" onClick="ugr_start();"/>
+</td></tr>
+</form>
+<form method="POST" onsubmit="return chkForm(this);">
+<tr><td><div>E-mail & Auto Warning Report Settings</div></td></tr>
+<tr><td><label>SMTP Server Address/IP:</label><input name="email_addr" type="text" value="" maxlength="35" style="width:40%;"/></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Please enter host name or IP address(e.g. asix.com.tw or 10.4.1.100).</td></tr>
+<tr><td><label>Security:</label>
+<select name="smtp_security">
+<option value="0" selected >No Security</option>
+<option value="1"          >SSL</option>
+<option value="2"          >TLS</option>
+<option value="3"          >Auto</option>
+</select></td></tr>
+<tr><td><label>SMTP Server Port:</label><input name="smtp_port" type="text" value="" maxlength="5" /></td></tr>
+<tr><td><label>From E-mail Address:</label><input name="email_from" type="text" value="" maxlength="35" style="width:40%;"/></td></tr>
+<tr><td><label>To E-mail Address 1:</label><input name="email_to1" type="text" value="" maxlength="35" style="width:40%;"/></td></tr>
+<tr><td><label>To E-mail Address 2:</label><input name="email_to2" type="text" value="" maxlength="35" style="width:40%;"/></td></tr>
+<tr><td><label>To E-mail Address 3:</label><input name="email_to3" type="text" value="" maxlength="35" style="width:40%;"/></td></tr>
+<tr><td><label>Cold Start:</label>
+<select name="coldstart">
+<option value="0" selected >Disable</option>
+<option value="1"          >Enable</option>
+</select></td></tr>
+<tr><td><label>Authentication Failure:</label>
+<select name="authfail">
+<option value="0" selected >Disable</option>
+<option value="1"          >Enable</option>
+</select></td></tr>
+<tr><td><label>Local IP Address Changed:</label>
+<select name="ipchg">
+<option value="0" selected >Disable</option>
+<option value="1"          >Enable</option>
+</select></td></tr>
+<tr><td><label>Password Changed:</label>
+<select name="pswchg">
+<option value="0" selected >Disable</option>
+<option value="1"          >Enable</option>
+</select></td></tr>
+<tr><td class="btn">
+<input name="Save" type="submit" value="Save"/>
+<input name="Apply" type="submit" value="Apply" onclick="confirmType='submit'"/>
+<input name="Cancel" type="reset" value="Cancel" />
+</td></tr>
+</form>
+<form method="POST" onsubmit="return chkForm(this);">
+<tr><td><div>MODBUS Settings</div></td></tr>
+<tr><td><label>Transfer Mode:</label>
+<select name="mbtcp_xfer" style="width:250px;">
+<option value="0" selected >MODBUS TCP</option>
+<option value="1"          >Transparent TCP</option>
+</select></td></tr>
+<tr><td><label>Server Port:</label><input name="mbtcp_port" type="text" value="" maxlength="5" /></td></tr>
+<tr><td><label>Response Timeout:</label><input name="mb_rspTime" type="text" value="" maxlength="5" /></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Available range:10~65000ms.</td></tr>
+<tr><td><label>Inter-Frame Delay:</label><input name="mb_frameIntv" type="text" value="" maxlength="5" /></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Available range:10~500ms.</td></tr>
+<tr><td><label>Inter-Character Delay:</label><input name="mb_CharDelay" type="text" value="" maxlength="5" /></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Available range:10~500ms.</td></tr>
+<tr><td class="btn">
+<input name="Save" type="submit" value="Save"/>
+<input name="Apply" type="submit" value="Apply" onclick="confirmType='submitAndReboot'"/>
+<input name="Cancel" type="reset" value="Cancel" />
+</td></tr>
+</form>
+<form method="POST" onsubmit="return chkForm(this);">
+<tr><td><div>Network Backup Setting</div></td></tr>
+<tr><td><label>Backup Mode:</label>
+<select name="netback_mode" id="netback_mode">
+<option value="0" selected >Force Wifi</option>
+<option value="1"          >Force Ethernet</option>
+<option value="2"          >Wifi As Major</option>
+<option value="3"          >Ethernet As Major</option>
+</select></td></tr>
+<tr><td class="btn">
+<input name="Save" type="submit" value="Save" id="backup_save"/>
+<input name="Apply" type="submit" value="Apply"  id="backup_apply" onclick="confirmType='submitAndReboot'"/>
+<input name="Cancel" type="reset" value="Cancel" id="backup_cancel"/>
+<input name="hideBackupMode" type="hidden" value="1"/>
+</td></tr>
+</form>
+<form method="POST" onsubmit="return chkForm(this);">
+<tr><td><div>Restore Default and System Reboot</div></td></tr>
+<tr><td class="btn">
+<input name="restore" type="submit" value="Restore_Default" style="width:140px" onclick="confirmType='restore'"/>
+<input name="reboot" type="submit" value="Reboot" onclick="confirmType='reboot'"/>
+</td></tr>
+</form>
+<div id="ugr_dialog" style="margin-left:25%; padding:10px; width:600px; height:150px; position:absolute; border:3px outset #cccccc; background-color:#cccccc; text-align:center; display:none; font:italic bold 0.8em Arial, Helvetica; color:#ff0000">
+<h1>Uploading...</h1>
+<h3 style="color:#ff0000">Please don't turn off power, the process may fail due to power failure or loss of network connection. If this occurs please try the process again.</br>&nbsp;</h3>
+<h1 id="ugr_percent"></h1>
+<p id="ugr_pace"></p>
+</div>
+<iframe id="cmd" src="" style="display:none; position:static;"></iframe>
+<tr><td>&nbsp;</td></tr>
+<tr><td bgcolor="#6c9fd2">&nbsp;</td></tr>
+</table>
+<script src="axjs0.js" type="text/javascript"></script>
+<script language="JavaScript" type="text/javascript">
+<!--
+var ugr_dialog = document.getElementById('ugr_dialog');
+var ugr_pace = document.getElementById('ugr_pace');
+var ugr_percent = document.getElementById('ugr_percent');
+var ugr_smt = document.getElementById('ugr_smt');
+var ugr_btn = document.getElementById('ugr_btn');
+var cmd = document.getElementById('cmd');
+var tmrHandle=null, tmrTimeOut=null;
+var ugr_state=0;
+var ugr_timeout=0;
+var stuLine = document.getElementById('netback_mode');
+var backup_save = document.getElementById('backup_save');
+var backup_apply = document.getElementById('backup_apply');
+var backup_cancel = document.getElementById('backup_cancel');
+enablebkupmode();
+
+function ugr_start(){
+	confirmType='upgrade';
+	if (chkForm(document.getElementById('ugr_frm'))==false)
+		return;
+	ugr_state = 0;
+	ugr_percent.innerHTML="";
+	ugr_pace.innerHTML="Please wait...";
+	ugr_dialog.style.display='block';
+	ugr_btn.disabled = true;
+	get_ugr_stu();
+}
+function get_ugr_stu(){
+	if (tmrHandle!=null)
+	    clearTimeout(tmrHandle);
+	cmd.src="/hctent.htm?cmd=get_ugr_stu";
+	ugr_timeout = 60;
+	tmrTimeOut = setTimeout(function(){timeTick()}, 1000);
+}
+function rcvfunc(eles){
+var tmp;
+	if (tmrTimeOut!=null)
+		clearTimeout(tmrTimeOut);
+	if (eles[0]==null)
+		return;
+	tmp = eles[0].value.split("&");
+	if (ugr_state==0){
+		if (tmp[0]=='ready'){
+			ugr_state = 1;
+			ugr_smt.click();
+			tmrHandle = setTimeout(function(){get_ugr_stu()}, 1000);
+		}else{
+			ugr_state = 2;
+			ugr_pace.innerHTML = "Device is busying upgrading firmware by another user!</br>Please try again later.";
+		}
+	} else if (ugr_state==1 && tmp[2]!=0){
+		ugr_percent.innerHTML = Math.round((tmp[1]*100)/tmp[2])+'%';
+		ugr_pace.innerHTML = tmp[1]+'/'+tmp[2]+' Bytes';
+		tmrHandle = setTimeout(function(){get_ugr_stu()}, 1000);
+	}
+}
+function closeDialog(){
+	if (ugr_state>1){
+		ugr_dialog.style.display='none';
+		ugr_btn.disabled = false;
+		if (ugr_state==3)
+			location.reload(true);
+	}
+}
+function timeTick(){
+	if (ugr_timeout)
+		ugr_timeout--;
+	if (ugr_timeout==0){
+		ugr_state = 2;
+		ugr_pace.innerHTML = "</br>Device connection timeout!";
+	}
+	else {
+		tmrTimeOut = setTimeout(function(){timeTick()}, 1000);
+	}
+}
+
+function enablebkupmode(){
+	var value = document.getElementsByName("hideBackupMode")[0].value;
+	if(value == 0) {
+		stuLine.disabled=true;
+		backup_save.disabled=true;
+		backup_apply.disabled=true;
+		backup_cancel.disabled=true;
+	}
+	else {
+		stuLine.disabled=false;
+		backup_save.disabled=false;
+		backup_apply.disabled=false;
+		backup_cancel.disabled=false;
+	}
+}
+//-->
+</script>
+</body>
+</html>

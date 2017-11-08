@@ -1,0 +1,124 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>RTC</title>
+<link href="axcss0.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table id="head">
+<tr><td class="utt"><a href="http://www.asix.com.tw" target="mainFrame">http://www.asix.com.tw</a></td></tr>
+<tr><td id="mimg">
+<img src="img/Logo.jpg" alt="" width="67" height="62" />
+<img src="img/asix.gif" alt="" width="95" height="24" id="asix"/>
+<span id="corp">ELECTRONICS CORPORATION</span>
+<span id="devname">AXM23001 RS-232 to WiFi</span>
+</td></tr>
+<tr><td class="utt"><a href="index.htm">Logout</a></td></tr>
+<tr><td class="nvg">
+<ul>
+<li><a href="basic.htm">Basic</a></li>
+<li><a href="advanced.htm">Advanced</a></li>
+<li><a href="security.htm">Security</a></li>
+<li><a href="wifi.htm">WiFi</a></li>
+<li><a href="wifi_wz.htm">WiFi Wizard</a></li>
+<li id="fucs"><a href="rtc.htm">RTC</a></li>
+<li><a href="status.htm">Status</a></li>
+</ul>
+</td></tr>
+</table>
+<table id="ctent">
+<form method="POST" onsubmit="return chkForm(this);">
+<tr><td><div>RTC Settings</div></td></tr>
+<tr><td><label>RTC Time Setup:</label>
+	<input name="rtc_clb" type="radio" style="width: 40px" value="0" onclick="DateTimeDisable('rtcSetNtp');"/>Manual
+	<input name="rtc_clb" type="radio" style="width: 40px" value="1" checked id="rtcSetNtp" onclick="DateTimeDisable('rtcSetNtp');"/>NTP Server
+</td></tr>
+<tr><td><label>Daylight Saving Time:</label>
+<select name="dst_onoff">
+<option value="0" selected>Disable</option>
+<option value="1"         >Enable</option>
+</select></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Note that the daylight saving time is supported only in NTP server mode.</td></tr>
+<tr><td><div>Date&Time Settings</div></td></tr>
+<tr><td><label>Date:</label>
+	<input name="rtc_yy" type="text" style="width: 5em" value="2011" maxlength="4" />
+	/<input name="rtc_mm" type="text"  style="width: 4em" value="04" maxlength="2" />
+	/<input name="rtc_dd" type="text"  style="width: 4em" value="06" maxlength="2" />
+</td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Please enter the year between 2000~2099, the month between 1~12,<br>and the date between 1~31.</td></tr>
+<tr><td><label>Time:</label>
+	<input name="rtc_hh" type="text" style="width: 5em" value="00" maxlength="2" />
+	/<input name="rtc_nn" type="text" style="width: 4em" value="04" maxlength="2" />
+	/<input name="rtc_ss" type="text" style="width: 4em" value="06" maxlength="2" />
+</td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Please enter the hour between 0~23, the minute between 0~59,<br>and the second between 0~59.</td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>&nbsp;</td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Note that the date and time are allowed to modify in manual mode.</td></tr>
+<tr><td><div>SNTP Client Settings</div></td></tr>
+<tr><td><label>Time Zone:</label>
+<select name="ntps_tz" style="width:300px">
+<option value="0" selected >GMT-12.0 Eniwetok, Kwajalein</option>
+<option value="1"          >GMT-11.0 Midway Island., Samoa</option>
+<option value="2"          >GMT-10.0 Hawaii</option>
+<option value="3"          >GMT-9.0 Alaska</option>
+<option value="4"          >GMT-8.0 Los Angeles, Tijuana</option>
+<option value="5"          >GMT-7.0 Denver Arizona</option>
+<option value="6"          >GMT-6.0 Chicago, MexicoCity</option>
+<option value="7"          >GMT-5.0 New York, Bogota</option>
+<option value="8"          >GMT-4.0 Santiago</option>
+<option value="9"          >GMT-3.0 Brasilia, Montevideo</option>
+<option value="10"          >GMT-2.0 Fernando de Noronha</option>
+<option value="11"          >GMT-1.0 Azores</option>
+<option value="12"          >GMT+0.0 Lisbon, London</option>
+<option value="13"          >GMT+1.0 Berlin, Paris</option>
+<option value="14"          >GMT+2.0 Helsinki, Cairo</option>
+<option value="15"          >GMT+3.0 Moscow, Nairobi</option>
+<option value="16"          >GMT+4.0 Abu Dhabi, Baku</option>
+<option value="17"          >GMT+5.0 Karachi, Islamabad</option>
+<option value="18"          >GMT+6.0 Almaty, Dhaka</option>
+<option value="19"          >GMT+7.0 Bangkok, Jakarta</option>
+<option value="20"          >GMT+8.0 Hong Kong, Singapore</option>
+<option value="21"          >GMT+9.0 Seoul, Tokyo</option>
+<option value="22"          >GMT+10.0 Melbourne, Sydney</option>
+<option value="23"          >GMT+11.0 Solomon Is.</option>
+<option value="24"          >GMT+12.0 Fiji, Wellington</option>
+</select></td></tr>
+<tr><td><label>NTP Server HostName/IP 1:</label><input name="ntps_name1" type="text" value="time.stdtime.gov.tw" maxlength="35" /></td></tr>
+<tr><td><label>NTP Server HostName/IP 2:</label><input name="ntps_name2" type="text" value="tick.stdtime.gov.tw" maxlength="35" /></td></tr>
+<tr><td><label>NTP Server HostName/IP 3:</label><input name="ntps_name3" type="text" value="tock.stdtime.gov.tw" maxlength="35" /></td></tr>
+<tr><td class="btn">
+<input name="Save" type="submit" value="Save"/>
+<input name="Apply" type="submit" value="Apply" onclick="confirmType='submit'"/>
+<input name="Cancel" type="reset" value="Cancel" />
+</td></tr>
+</form>
+<tr><td>&nbsp;</td></tr>
+<tr><td bgcolor="#6c9fd2">&nbsp;</td></tr>
+</table>
+<script src="axjs0.js" type="text/javascript"></script>
+<script language="javascript" type="text/javascript">
+DateTimeDisable('rtcSetNtp');
+function DateTimeDisable(eIdCondition){
+	var eObjCondit=document.getElementById(eIdCondition), i, condit, eles;
+	if (eObjCondit.checked) condit=true;
+	else condit=false;
+	eles=eObjCondit.form.elements;
+	for (i=0;i<eles.length;i++){
+		switch (eles[i].name){
+		case 'rtc_yy':
+		case 'rtc_mm':
+		case 'rtc_dd':
+		case 'rtc_hh':
+		case 'rtc_nn':
+		case 'rtc_ss':
+			eles[i].disabled=condit;
+			break;
+		default:
+			break;
+		}
+	}
+}
+</script>
+</body>
+</html>

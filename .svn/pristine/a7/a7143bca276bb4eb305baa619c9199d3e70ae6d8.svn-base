@@ -1,0 +1,44 @@
+//======================================================================
+// Web File Convert Tool Revision History
+// Module Name: mfilesys.exe 
+//
+// This document describes the major changes, additions and bug fixes made 
+// to the mfilesys.exe. 
+//======================================================================
+===========================
+Version 2.4.0  (2015-11-23)
+===========================
+1. Provided the optimized setting values of maximum post count and maximum divided number.
+
+===========================
+Version 2.3.0  (2015-09-14)
+===========================
+1. Accepted parameters input for configuration.
+2. Extended the maximum allocated buffer number to be 200 in each supported element type.
+3. Added new parameter as "-p2t" for PASSWORD to TEXT type force convertion and fixed the compatibilty issue with older HTTPD modules.
+
+===========================
+Version 2.2.0  (2012-10-22)
+===========================
+1. Removed the JAR file type and changed the assignment of .jar file to JS file type.
+2. Shown all the existed file and element indexs within filesys.h.
+3. Modified the declaration of "extern entry entries[20]" to "extern entry entries[]" within filesys.h.
+4. Added compiled conditions as "#if (MAX_POST_RECORDS)" for pure static web site.
+5. Fixed the wrong maximum division size of divided image file to 64Kbyes.
+
+===========================
+Version 2.1.0  (2012-07-10)
+===========================
+1. Supported checkbox and file record element type.
+2. removed the restriction that the location of keyword "checked" must be after which of the keyword "value".
+3. Add the new function can be ignoring some of non-html code segments(such as<!--..-->, <script>..</script> and <style>..</style>) in html parsing.
+4. Fixed the bug, the program will be crash in some of windows XP environment.
+5. Fixed the bug, the program will be crash once the resource file length is 0.
+6. Supported file type as "xxx.jar".
+7. Added to display error message whenever the conversion is failed.
+8. Supported unprintable element value.
+
+===========================
+Version 2.0.0  (2011-03-17)
+===========================
+1. initial release.

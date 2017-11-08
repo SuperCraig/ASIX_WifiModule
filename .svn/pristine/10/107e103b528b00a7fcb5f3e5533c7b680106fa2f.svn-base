@@ -1,0 +1,238 @@
+#include "MBI_ASIXTask.h"
+#include "device.h"
+#include "serial_api.h"
+#include "sockets.h"
+#include "api.h"
+#include "main.h"
+#include "gconfig.h"
+#include "gudpdat.h"
+#include "guart.h"
+#include "gs2w.h"
+#include "platform_opts.h"
+#include "rtc.h"
+#include "i2c_api.h"
+#include "gconf_ap.h"
+#include "analogin_api.h"    //Edit by Hsinhua, 08/20----------------
+#include <sys_api.h>         //Edit by Hsinhua, 08/20----------------
+
+void MBI_UDPTask();
+void MBI_TCPTask();
+void RTC_READ_Task(void *pParam);
+extern xQueueHandle RTC_Queue;
+
+// Edit by Hsinhua, Add TEMP_sensor, 0820---------------------------
+extern xQueueHandle tempQueue;
+
+// Edit by Hsinhua, Add ADC_input, 0820---------------------------
+void ADC_READ_Task(void *pParam);
+#define OFFSET 		0x298							
+#define GAIN_DIV	0x34C							
+#define AD2MV(ad,offset,gain) (((ad/16)-offset)*1000/gain)
+uint16_t	ADC_data_0, ADC_data_1, ADC_data_2, ADC_data_3;
+
+
+xQueueHandle UDPTxQueue;	
+xQueueHandle UDPRxQueue;	
+xQueueHandle TCPTxQueue;
+xQueueHandle TCPRxQueue;
+
+xQueueHandle Cmd16Queue;
+
+
+portTickType    xTimeToSendCmd16=NULL;
+portTickType    xTimeTemp=NULL;
+        
+
+void MBI_Init(void){
+	
+	//xTaskCreate(pvTaskCode,pcName,usStaskDepth,pvParameters,uxPriority,pxCreatTask);
+	
+	xTaskCreate(MBI_UDPTask,"UDPTask",1000,NULL,1,NULL);	
+	xTaskCreate(MBI_TCPTask,"TCPTask",1000,NULL,1,NULL);
+	
+	//xQueueHandle xQueue = xQueueCreate(uxQueueLength,uxItemSize);
+        
+        
+        RTC_Queue = xQueueCreate( 2 , sizeof( RTC_TIME )); 
+
+        if(xTaskCreate( RTC_READ_Task, ( signed portCHAR * ) "RTC_READ_Task", 500, NULL, tskIDLE_PRIORITY+1, NULL ) == pdPASS)
+      	{
+              printf("\n Create RTC_READ_Task pass! \n");
+	}
+	
+        // Edit by Hsinhua, Add TEMP_sensor, 0820---------------------------
+        tempQueue = xQueueCreate( 2 , sizeof( TEMP_SENSOR ));  
+    
+        // Edit by Hsinhua, Add ADC_input, 0820---------------------------
+        if(xTaskCreate( ADC_READ_Task, ( signed portCHAR * ) "RTC_READ_Task", 500, NULL, tskIDLE_PRIORITY+1, NULL ) == pdPASS)
+      	{
+              printf("\n Create ADC_READ_Task pass! \n");
+	}
+        
+        
+	UDPTxQueue=xQueueCreate(1,sizeof(uint16_t));	
+	UDPRxQueue=xQueueCreate(1,sizeof(uint16_t));	
+	TCPTxQueue=xQueueCreate(1,sizeof(uint16_t));	
+	TCPRxQueue=xQueueCreate(1,sizeof(uint16_t));
+    
+}
+
+void MBI_UDPTask(void *param){
+	//portBASE_TYPE xQueueSendToFront(xQueueHandle xQueue,const void *pvItemToQueue,portTickType xTicksToWait);
+	//portBASE_TYPE xQueueSendToBack(xQueueHandle xQueue,const void *pvItemToQueue,portTicksType xTickToWait);	
+	//portBASE_TYPE xQueueReceive(xQueueHandle xQueue,const void *pvBuffer,portTicksType xTicksToWait);
+	//port_BASE_TYPE xQueuePeek(xQueueHandle xQueue,const void *pvBuffer,portTicksType xTickToWait);
+	
+	u16 lValueToSend = 40;			
+	u16 lReceivedLen;		
+        u16 i;
+	portBASE_TYPE xUDPTxStatus;
+	portBASE_TYPE xUDPRxStatus;
+        portBASE_TYPE xCmd16Status;
+
+	const portTickType xTickToWait=100/portTICK_RATE_MS; 	//100ms
+	
+	//lValueToSend=(long)param;
+	
+	while(1){
+		/*
+			TODO
+		*/     
+          if(uxQueueMessagesWaiting(UDPRxQueue) == 0){          
+			//vPrintString("Queue normal should have been empty!\r\n"); 
+            xUDPRxStatus=xQueueReceive(UDPRxQueue,&lReceivedLen,xTickToWait);
+            if(xUDPRxStatus == pdPASS){
+                    printf("\n\r xUDPRxStatus receive pass! %d\n", lReceivedLen);
+                    //CommandToDo(Cmd20,buf12,1);
+                //=====================================================================
+                      
+                    UDPRxBuffer[13]+=8;
+                    UDPRxBuffer[15]+=8;
+                    
+
+                    CommandCode = IdentifyCommand(UDPRxBuffer,1);
+                    printf("\nMBI_UDPTask, CmdCode:%x\n",CommandCode);
+                    
+                    //CommandToDo(CommandCode,UDPRxBuffer,0);
+                    CommandToDo(CommandCode,UDPRxBuffer,1);
+
+                //=====================================================================                    
+                    CommandCode = IdentifyCommand(UDPTxBuffer,0); 
+                    lValueToSend = GetCommandLength(CommandCode);
+                    if (lValueToSend != NULL)
+                        xUDPTxStatus = xQueueSendToBack(UDPTxQueue,&lValueToSend,1);
+                    
+            }
+          }
+      
+          if(Cmd16Content.Duration!=0 || gconfig_ConfigData.MBI_FactorySettings.Duration!=0){
+            Cmd16Content.Duration = gconfig_ConfigData.MBI_FactorySettings.Duration;
+            xTimeToSendCmd16 = xTaskGetTickCount();
+            if ((xTimeToSendCmd16-xTimeTemp) >= Cmd16Content.Duration*1000){
+                SendCommandFactory(Cmd16);
+                xTimeTemp=xTimeToSendCmd16;
+                lValueToSend=Cmd16Len;
+                xCmd16Status=xQueueSendToBack(Cmd16Queue,&lValueToSend,1);
+             }
+           }        
+          
+		//xUDPTxStatus=xQueueSendToBack(UDPTxQueue,&lValueToSend,0);
+		//if(xUDPTxStatus!=pdPASS){
+        //          printf("xUDPTxStatus creat!");
+		//	//UDP command want to send
+		//}
+	}
+}
+
+void MBI_TCPTask(void *param){
+	u16 lValueToSend;			//the value used to announce send the TCP Packet already
+	u16 lReceivedValue;		//the value used to decide to send TCP Packet yes or not
+	
+	portBASE_TYPE xTCPTxStatus;
+	portBASE_TYPE xTCPRxStatus;
+	
+	const portTickType xTickToWait=100/portTICK_RATE_MS; 	//100ms
+	
+	lValueToSend=(long)param;
+	
+	while(1){
+		/*
+			TODO
+		*/
+		
+		if(uxQueueMessagesWaiting(TCPRxQueue) == 0){            
+			//vPrintString("Queue normal should have been empty!\r\n");
+            xTCPRxStatus = xQueueReceive(TCPRxQueue,&lReceivedValue,xTickToWait);
+            if(xTCPRxStatus == pdPASS){
+                //vPrintStringAndNumber("Received= ",lReceivedValue);
+                printf("\n\r xTCPRxStatus receive pass!");  
+                
+            }
+                    
+		}
+		
+		
+		//xTCPTxStatus=xQueueSendToBack(TCPTxQueue,&lValueToSend,0);
+		//if(xTCPTxStatus!=pdPASS){
+        //           printf("xTCPTxStatus not creat!");
+		//	//TCP Command want to send
+		//}
+	}
+}
+
+
+void RTC_READ_Task(void *pParam)  
+{      
+    for( ;; )  
+    {  
+        RTC_TIME time_1;
+        
+        RTC_GetCurrTime(&time_1);
+
+        xQueueSend( RTC_Queue, ( void* )&time_1, 1 );  
+           
+        // Edit by Hsinhua, Add Temp_sensor, 0820---------------------------
+        TEMP_SENSOR temp_1;
+        
+        THS_GetTemperature(&temp_1.Temperature);
+        
+        THS_GetRelativeHumidity(&temp_1.Humidity);
+        
+        xQueueSend( tempQueue, ( void* )&temp_1, 1 ); 
+        
+        vTaskDelay( 1000/portTICK_RATE_MS );  
+        
+    }  
+} 
+
+// Edit by Hsinhua, Add ADC_input, 0820---------------------------
+void ADC_READ_Task(void *pParam)  
+{      
+    for( ;; )  
+    {  
+        int32_t v_mv1;
+        uint16_t offset, gain;
+        offset = OFFSET;
+    	gain = GAIN_DIV;
+        
+        analogin_t   adc;
+	u16 adcdat;
+                
+        analogin_init(&adc, AD_3);
+        adcdat = analogin_read_u16(&adc);
+        v_mv1 = AD2MV(adcdat, offset, gain);
+	analogin_deinit(&adc);
+        ADC_data_2 = ADC_data_1;
+        ADC_data_1 = ADC_data_0;
+        ADC_data_0 = v_mv1 >> 8;
+        if((ADC_data_2 == ADC_data_1) && (ADC_data_2 == ADC_data_0))
+        { 
+         ADC_data_3 = v_mv1;
+        //printf("AD0:%x = %d mv \n", adcdat, v_mv1); 
+        }
+        
+        vTaskDelay( 300/portTICK_RATE_MS );  
+        
+    }  
+} 
+

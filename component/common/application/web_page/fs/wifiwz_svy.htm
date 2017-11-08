@@ -1,0 +1,193 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>wifiwz_svy</title>
+<style type="text/css">
+<!--
+body{background-color:#EDEFEF;}
+.wz{position:relative;width:700px;margin:0 auto 20px auto;padding:0;}
+.wz .tb{width:650px;margin:0 auto 0 auto;border-style:none;table-layout:fixed;border-collapse:collapse;font:0.33cm Verdana,Geneva,sans-serif;color:#036;text-align:left;}
+.wz .tb th{font:0.6cm Verdana,Geneva,sans-serif;color:#036;text-align:center;padding-bottom:20px;}
+.svy{position:relative;width:700px;margin:0 auto 0 auto;padding:0;}
+.svy .tb{width:650px;margin:0 auto 0 auto;background-color:#ffffff;border:1px solid #808080;table-layout:fixed;border-collapse:collapse;white-space:nowrap;text-align:left;}
+.svy .tb th{padding:0;background-color:#0000FF;font:bold 0.33cm Verdana,Geneva,sans-serif;color:#FFFFFF;text-align:left;}
+.svy .tb td{padding:0;font:0.3cm Verdana,Geneva,sans-serif;color:#000000;}
+.svy .ctrl{width:650px;margin:0 auto 0 auto;border-style:none;table-layout:fixed;border-collapse:collapse;white-space:nowrap;text-align:left;font:0.33cm Verdana,Geneva,sans-serif;color:#036;}
+.svy .ctrl th{background-color:#FFFFFF;border:1px solid #000000;}
+.svy .ctrl td{text-align:right;}
+.svy .ctrl td input{width:100px;display:inline;margin:2px 0 2px 10px;}
+-->
+</style></head>
+<body>
+<div class="wz">
+<table class="tb">
+<tr><th>Welcome to the WiFi Setup Wizard</th></tr>
+<tr><td>Use site survey tool to join a WiFi AP.</td></tr>
+</table>
+</div>
+<div class="svy" id="tst_div">
+<table id="svy_tb" class="tb">
+<tr><th width="5%">ID</th><th width="23%">BSSID</th><th width="32%">SSID</th><th width="10%">TYPE</th><th width="5%">CH</th><th width="10%">SIGNAL</th><th width="15%">SECURITY</th></tr>
+</table>
+<table class="ctrl">
+<tr><th style="text-align:left;">Status:&nbsp;<span id="stu_line" style="font:0.3cm Verdana,Geneva,sans-serif;color:#0000FF;"></span></th></tr>
+<tr><td><input id="scan" type="button" value="Scan"/><input id="conn" type="button" value="Next"/></td></tr>
+</table>
+<iframe id="request" src="" style="visibility:hidden;position:absolute" tabIndex="-1"></iframe>
+</div>
+<script language="JavaScript" type="text/javascript">
+<!--
+var lastSelObj, maxRows=25, svyItems=0;
+var tmrScan, btnScan = document.getElementById('scan'), scanTimeout, scanState=0;
+var tmrConn, btnConn = document.getElementById('conn'), connTimeout, connState=0;
+var stuLine = document.getElementById('stu_line');
+window.onload = function(){
+btnScan.onclick = svy_scan;
+btnConn.onclick = svy_conn;
+svy_createTab(document.getElementById('svy_tb'), maxRows);
+svy_scan();
+}
+function svy_sel(){
+	if (this.id<svyItems){
+		if (lastSelObj)
+			lastSelObj.style.backgroundColor = '#ffffff';
+		this.style.backgroundColor = '#A5DFFE';
+		lastSelObj = this;
+		btnConn.disabled = false;
+	}
+}
+function svy_send(req){
+		document.getElementById("request").setAttribute("src","cgireq.htm?"+req);
+}
+function svy_scan(){
+	switch (scanState){
+	case 0:
+		svy_clearTab(maxRows);
+		stuLine.innerHTML = 'Scanning...';
+		btnScan.disabled = true;
+		scanTimeout = 15;
+		scanState = 1;
+		svy_send('req=wifi_scan&row='+maxRows);
+		tmrScan=setTimeout('svy_scan()', 1000);
+		break;
+	case 1:
+		if (scanTimeout){
+			scanTimeout--;
+		}else{
+			stuLine.innerHTML = stuLine.innerHTML+'timeout';
+			scanState = 2;
+		}
+		tmrScan=setTimeout('svy_scan()', 1000);
+		break;
+	case 2:
+		btnScan.disabled = false;
+		scanState = 0;
+		break;
+	}
+}
+
+function svy_conn(){
+	var subItems, reqstr;
+	switch (connState){
+	case 0:
+		if (lastSelObj){
+			subItems = lastSelObj.childNodes;
+			btnConn.disabled = true;
+			connTimeout = 15;
+			connState = 1;
+			svy_send('req=wifi_conn&ssid='+subItems[2].innerHTML+'&ch='+subItems[4].innerHTML+'&security='+subItems[6].innerHTML);
+			tmrConn=setTimeout('svy_conn()', 1000);
+		}
+		break;
+	case 1:
+		if (connTimeout){
+			connTimeout--;
+		}else{
+			stuLine.innerHTML = stuLine.innerHTML+'timeout';
+			connState = 2;
+		}
+		tmrConn=setTimeout('svy_conn()', 1000);
+		break;
+	case 2:
+		btnConn.disabled = false;
+		connState = 0;
+		break;
+	}
+}
+function cgireq_cb(items, names, values){
+	if (items<2)
+		return;
+	switch (values[0]){
+	case 'wifi_scan':
+		if (scanState!=1)
+			break;
+		if (items==3 && values[1]=='ok'){
+			svyItems = svy_updateTab(maxRows, values[2]);
+		}
+		btnScan.disabled = false;
+		stuLine.innerHTML = stuLine.innerHTML+values[1];
+		scanState = 2;
+		break;
+	case 'wifi_conn':
+		if (connState!=1)
+			break;
+		btnConn.disabled = false;
+		connState = 2;
+		if (values[1]=='Open')
+			location = "./wifiwz_cfirm.htm";
+		else if (values[1]=='Key')
+			location = "./wifiwz_key.htm";
+		else
+			stuLine.innerHTML = stuLine.innerHTML+values[1];
+		break;
+	}
+}
+function svy_createTab(obj, rows){
+	var i, j;
+	if (obj==null)
+		return;
+	for (i=0; i<rows; i++){
+		var tr = obj.insertRow(i+1);
+		tr.id = i;
+		tr.onclick = svy_sel;
+		for (j=0; j<7; j++){
+			tr.insertCell(j);
+		}
+	}
+	svy_clearTab(rows);
+}
+function svy_clearTab(rows){
+	var i, j, item, subItems;
+	if (lastSelObj){
+		lastSelObj.style.backgroundColor = '#ffffff';
+		lastSelObj = 0;
+	}
+	stuLine.innerHTML = '';
+	btnConn.disabled = true;
+	for (i=0; i<rows; i++){
+		item = document.getElementById(i);
+		if (item==null)
+			continue;
+		subItems = item.childNodes;
+		for (j=0; j<subItems.length; j++){
+			subItems[j].innerHTML = '&nbsp;';
+		}
+	}
+}
+function svy_updateTab(rows, list){
+	var i, items, subItems;
+	items=list.split(';');
+	for (i=0; i<items.length; i++){
+		if (i>=rows)
+			break;
+		subItems=items[i].split(',');
+		for (j=0; j<subItems.length; j++)
+			document.getElementById(i).childNodes[j].innerHTML = subItems[j];
+	}
+	return i;
+}
+//-->
+</script>
+</body>
+</html>

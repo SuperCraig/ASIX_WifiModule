@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>wifi</title>
+<link href="axcss0.css" rel="stylesheet" type="text/css" />
+</head>
+<body onload="cfg_lock();">
+<table id="head">
+<tr><td class="utt"><a href="http://www.asix.com.tw" target="mainFrame">http://www.asix.com.tw</a></td></tr>
+<tr><td id="mimg">
+<img src="img/Logo.jpg" alt="" width="67" height="62" />
+<img src="img/asix.gif" alt="" width="95" height="24" id="asix"/>
+<span id="corp">ELECTRONICS CORPORATION</span>
+<span id="devname">AXM23001 RS-232 to WiFi</span>
+</td></tr>
+<tr><td class="utt"><a href="index.htm">Logout</a></td></tr>
+<tr><td class="nvg">
+<ul>
+<li><a href="basic.htm">Basic</a></li>
+<li><a href="advanced.htm">Advanced</a></li>
+<li><a href="security.htm">Security</a></li>
+<li id="fucs"><a href="wifi.htm">WiFi</a></li>
+<li><a href="wifi_wz.htm">WiFi Wizard</a></li>
+<li><a href="rtc.htm">RTC</a></li>
+<li><a href="status.htm">Status</a></li>
+</ul>
+</td></tr>
+</table>
+<table id="ctent">
+<form method="POST" onsubmit="return chkForm(this);">
+<tr><td><div>System Settings</div></td></tr>
+<tr><td><label>Network Mode:</label><select name="network_mode" id="mode" onchange="cfg_lock();">
+	<option value="0" selected >Station</option>
+	<option value="1"          >AP</option>
+</select></td></tr>
+<tr><td><label>AP Channel:</label><select name="channel" id="ch">
+	<option value="0" selected >1</option>
+	<option value="1"          >2</option>
+	<option value="2"          >3</option>
+	<option value="3"          >4</option>
+	<option value="4"          >5</option>
+	<option value="5"          >6</option>
+	<option value="6"          >7</option>
+	<option value="7"          >8</option>
+	<option value="8"          >9</option>
+	<option value="9"          >10</option>
+	<option value="10"         >11</option>
+	<option value="11"         >12</option>
+	<option value="12"         >13</option>
+	<option value="13"         >14</option>
+</select></td></tr>
+<tr><td><label>Service Area Name/SSID:</label>
+	<input name="ssid" type="text" value="asixtest" maxlength="31" style="width:20%;"/>
+	<span class='labtxt'>&nbsp;&nbsp;Hide SSID:</span>
+	<input name="hide_ssid" id="hide_ssid" type="checkbox" value="hide_ssid" style="width:5%;"/>
+	</td></tr>
+<tr><td><label>Security Mode:</label><select name="security_mode" id="enc_mode">
+	<option value="0" selected >Open</option>
+	<option value="1"          >WEP</option>
+	<option value="2"          >WPA/WAP2 Auto</option>
+	</select></td></tr>
+<tr><td><div>WEP Encryption Key Settings</div></td></tr>
+<tr><td><label>Key Length:</label><select name="key_length" id="key_length" onchange="fillwep();">
+	<option value="0" selected >64 bits</option>
+	<option value="1"          >128 bits</option>
+</select></td></tr>
+<tr><td><label>Key Index Select:</label><select name="key_index">
+	<option value="0" selected >Key Index 0</option>
+	<option value="1"          >Key Index 1</option>
+	<option value="2"          >Key Index 2</option>
+	<option value="3"          >Key Index 3</option>
+</select></td></tr>
+<tr><td><label>Key Index 0:</label><input name="key_index_0" id="key_index_0" type="text" value="" maxlength="26" style="width:40%;"/></td></tr>
+<tr><td><label>Key Index 1:</label><input name="key_index_1" id="key_index_1" type="text" value="" maxlength="26" style="width:40%;"/></td></tr>
+<tr><td><label>Key Index 2:</label><input name="key_index_2" id="key_index_2" type="text" value="" maxlength="26" style="width:40%;"/></td></tr>
+<tr><td><label>Key Index 3:</label><input name="key_index_3" id="key_index_3" type="text" value="" maxlength="26" style="width:40%;"/></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label><p id='wep_prompt'></p></td></tr>
+<tr><td><div>AES/TKIP Encryption Key Settings</div></td></tr>
+<tr><td><label>AES/TKIP Passphrase:</label><input name="aes_passphrase" type="text" value="" maxlength="63" style="width:40%;"/></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Please enter a string between 8~63 digits in length.</td></tr>
+<tr><td class="btn">
+	<input name="Save" type="submit" value="Save"/>
+	<input name="Apply" type="submit" value="Apply" onclick="confirmType='submitAndReboot'"/>
+	<input name="Cancel" type="reset" value="Cancel" />
+</td></tr>
+</form>
+<tr><td>&nbsp;</td></tr>
+<tr><td bgcolor="#6c9fd2">&nbsp;<iframe id="ifr" style="visibility:hidden;position:absolute" tabIndex="-1"></iframe></td></tr>
+</table>
+<script src="axjs0.js" type="text/javascript"></script>
+<script language="JavaScript" type="text/javascript">
+<!--
+var weps=new Array;
+var minChNum=1, maxChNum=14;
+function cfg_lock(){
+var mode=document.getElementById("mode");
+var ch=document.getElementById("ch");
+var enc_mode=document.getElementById("enc_mode");
+var hide_ssid=document.getElementById("hide_ssid");
+	if (mode.value==0){
+		ch.disabled=true;
+		hide_ssid.disabled=true;
+		enc_mode.options[1].disabled=false;
+		enc_mode.options[2].text='WPA/WPA2 Auto';
+	}else{
+		ch.disabled=false;
+		hide_ssid.disabled=false;
+		enc_mode.options[1].disabled=true;
+		enc_mode.options[2].text='WPA2 AES PSK';
+	}
+}
+document.getElementById("ifr").setAttribute("src","hctent.htm?cmd=getwep");
+function fillwep() {
+var i, wep_info, wep_len=document.getElementById("key_length").value;
+	if (weps[0] != null && weps[1] != null){
+		if (wep_len == "0")	{
+			var wep_info = weps[0].value.split("&");
+			for (i=0;wep_info[i]!=null && document.getElementById("key_index_"+i)!=null;i++)
+				document.getElementById("key_index_"+i).value=wep_info[i];
+		} else {
+			var wep_info = weps[1].value.split("&");
+			for (i=0;wep_info[i]!=null && document.getElementById("key_index_"+i)!=null;i++)
+				document.getElementById("key_index_"+i).value = wep_info[i];
+		}
+	}
+	if (wep_len=='0')
+	{
+		document.getElementById("wep_prompt").innerHTML='Please enter 5 ASCII codes or 10-digit hex for 64-bit key length.';
+	}
+	else
+	{
+		document.getElementById("wep_prompt").innerHTML='Please enter 13 ASCII codes or 26-digit hex for 128-bit key length.';
+	}
+	if (weps[2]!=null)
+	{
+		var ch_plan_info = weps[2].value.split("&");
+		if (ch_plan_info[0]!=null && ch_plan_info[1]!=null)
+		{
+			minChNum = Number(ch_plan_info[0]);
+			maxChNum = Number(ch_plan_info[1]);
+		}
+	}
+}
+function rcvfunc(eles){
+	weps=eles;
+	fillwep();
+}
+//-->
+</script>
+</body>
+</html>

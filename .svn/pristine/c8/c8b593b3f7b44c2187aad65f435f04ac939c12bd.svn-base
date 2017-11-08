@@ -1,0 +1,438 @@
+//======================================================================
+// AXM23001 RS232-to-WiFi Reference Design
+// Device Server Firmware Revision History
+//
+// This document describes the major changes, additions and bug fixes made 
+// to the Device Server Firmware between released versions. 
+//======================================================================
+Version 0.7.5 (2017-05-12)
+1. Fixed the memory leak of function wifi_connect()/wifi_connect_bssid() in wifi_conf.c
+2. The ttl of DNS RR should not be cached when the value is 0.
+3. Supported the tos field of IP header setting.
+4. Added the command, wifi_wepkeylen, to configure/check the setting of WEP key either 64/128bits.
+
+Version 0.7.4 (2017-03-30)
+1. Fixed the issue that "setnetbackup" command cannot be removed in clicmd module,
+   while configure CONFIG_NETWORK_BACKUP_SWITCH_MODE to 0.
+
+Version 0.7.3 (2017-03-29)
+1. Change the flow of enabling adaptivity for turn on the adaptivity under Europe/Japan domain.
+2. Merge 3.4b3_wlan_rw_channel_plan_(V01)
+   * Update lib_wlan.a (2016.05.20 to 2016.10.25)
+   * Update wifi_conf.c
+   * Update wifi_constants.h
+3. Add threshold command for adaptivity.
+4. Extend the command "wifi_debug" under "adap" parameter (dbg 0x7fc10000 0x20000).
+5. Enable the command "iwpriv".
+
+Version 0.7.2 (2017-01-16)
+1. Fixed the issue that cannot transfer data between serial port and WiFi AP mode.
+
+Version 0.7.1 (2017-01-12)
+1. Enhance network backup function as below 4 modes:
+   - Force WIFI
+   - Force Ethernet
+   - WIFI as major
+   - Ethernet as major
+note: Wifi AP mode and DHCP server will be turned off while ethernet linked.
+2. Add MISC_NetInterfaceReadyCheck() for checking link under backup mode.
+3. Reject realtek related commands due to wifi be turned off.
+4. Fixed a bug that channel parser error in the command "wifi_ap".
+5. Fixed wrong response data in gn_get(...) google api.
+6. Fixed Ethernet interface link down issue and throughput decrement issue.
+7. Added the setting of DHCP server gateway IP address on WEB, clicmd console and log console.
+8. Fixed the issue of WEB firmware upgrade under FireFox 50.1.0.
+9. Fixed the wrong MAC address in cmd_ipConfig console command.
+
+Version 0.7.0 (2016-11-02)
+1. Added a new API, TNCOM_CopyUrRxToApp, and moved TNCom_Init() from library to GS2W_Init().
+2. Solved the issue that the pattern of entering AT command mode does not set when RFC2217 is selected.
+3. Supported dual-image architecture.
+4. Upgrade asix library to v0.7.0.
+5. Fixed the issue that cannot write default gconfig to flash while the checksum error.
+
+Version 0.6.8 (2016-10-06)
+1. Fixed the memory overlap error under BlueMix cloud service enable.
+2. Added device name setting command in both "wifi_interactive_mode" and "clicmd" modules.
+
+Version 0.6.7 (2016-09-26)
+1. Enhance firmware upgrade check in TFTP as following:
+   - Unreasonable firmware file size
+   - Take off old image2 offset judgement, image2 offset should equal to 0x80000
+2. Add hidden SSID support for AP mode.
+3. Supported manual control of TCP/UDP connection under client mode.
+4. Fixed an issue that LED did not flash while AP mode enter simple config.
+5. In "wifiwz_cfirm" WEB page of WiFi wizard, added warning message to remind user may lose the device if it connects to different WiFi network.
+6. Sync. "wifi_interactive_mode" and "clicmd" module.
+7. Supported hostname option in DHCP client module.
+8. Enabled keep alive option in R2W TCP sockets.
+9. Auto reject the new listened TCP connection in lwip stack if connection pool of application layer is full.
+10.Change firmware upgrade method for TFTP server and HTTP server.
+   Old: packet -> flash
+   New: packet -> image buffer -> flash
+11. Add API module for TFTP server (file checking mechanism & firmware upgrade).
+12. Added "upgrade" module for ota image file upgrading.
+
+Version 0.6.6 (2016-08-12)
+1. Enhanced the check of image2 start address and length before upgrading ota firmware using Web page.
+2. Upgraded addheader utility to v0.2.1.
+3. Applied Realtek's patches and fixed the incomplete OTA image issue under IAR v7.7 IDE.
+4. In R2W module, supported virtual DTR/DST signal under VCOM mode and always report DST=1 to VSPD for better compatibility.
+5. In R2W module, fixed wrong response code of IOCTL_SERIAL_GET_MODEM_STATUS request packet.
+6. Supported the assignment of default AP SSID with MAC address.
+
+Version 0.6.5 (2016-07-06)
+1. Supported Microsoft Azure cloud service.
+2. Updated asix library to v0.6.5. and fixed the issue that some library functions can not work while the WiFi is turned off.
+3. Changed the intial flow and ensure the asix library is ready before performing user's application initialization.
+4. Enhanced the connection process in MQTT over TLS.
+5. Enhanced the initial procedure of AX88796C and avoid the power sequence issue.
+6. Supported device auto registration with Bluemix cloud server.
+
+Version 0.6.4 (2016-06-14)
+1. Fixed the issue that system may crash while using MQTT over SSL/TLS secure connection.
+
+Version 0.6.3 (2016-06-13)
+1. Integrated with Realtek SDK v3.4b3(Include lib_wlan.a, platform_lib.a) and fixed issue that AP mode will hang with skb buffer error.
+2. Updated asix library to v0.6.3.
+3. Fixed wrong LED indicator after executing "wifi_off" command.
+4. Fixed wrong behavior after executing "wifi_on" command under AP mode.
+5. Fixed the issue about severe asymmetrical throughput under bidirectional data transfer.
+6. Changed the behavior of wifi auto reconnecion, only performed in the situation of passively wifi disconnection.
+7. Supported MQTT over TLS.
+8. Allowed developer to obtain MAC address and serial number at initial stage.
+
+Version 0.6.2 (2016-04-29)
+1. Fixed the issue that the R2W connection status and TX/RX counter doesn't changed in status WEB page.
+2. Fixed the wrong status message of wifi scanning on Wizard WEB page.
+3. Applied some of realtek patches for SDK 3.4b, that include following items:
+   MQTT module, adc module, tcp.c, checksum.exe, rtl8195a_uart.c, spi_api.c.
+4. Upgraded asix library to v0.6.2.
+5. Added CLI command to trigger simple config mode.
+
+Version 0.6.1 (2016-04-20)
+1. Allowed to configure DHCP client, static IP, Gateway, NetMask and DNS server IP in WiFi wizard.
+2. Updated asix library to v0.6.1.
+3. Fixed the URL decoding issue in Wizard page.
+
+Version 0.6.0 (2016-03-30)
+1. Supported MODBUS TCP to serial gateway.
+2. Add MQTT client(v3.1) and IBM bluemix support.
+3. Rearranged wifi scan result message and added item title.
+4. Showed modbus connection status and data traffic on web page and AXMR2W tool.
+5. Supported wifi site survey function on web page.
+6. Upgraded asix library to v0.6.0.
+7. Attempt to keep old configuration at reload stage if the configuration structure has extended.
+8. Allowed to configure maximum number of R2W TCP connections for server mode only.
+9. Changed the allocation of TCP transmitted buffer to SDRAM in gtcpdat module.
+
+Version 0.5.9 (2016-02-26)
+1. Supported the console function using HSUART interface and commands to configure device.
+2. Added the function to switch to the command mode of HSUART application if the pattern matched.
+3. Ported the log commands to the console commands for the HSUART application when the command mode is enabled.
+4. Added the check of channel input that matches the channel plan.
+5. Add smart plug (Prolific PL7223) support.
+6. Added Google nest application module.
+7. Supported multiple TCP connections for R2W server mode only.
+8. Take off "example_google" module.
+9. Selected "Large without multibytes" in "library option" and supported float variable print under HSUART command mode.
+10. Under R2W multi-connection mode, discard new incoming connection if connection buffer is full.
+
+Version 0.5.8 (2016-01-26)
+1. Removed unsupported country code in "countryid" console command.
+2. Removed lwip_chksndqlen() function in gtcpdat.c.
+3. Migrated the definition of "rtw_adaptivity_mode_t" from wifi_util.h to wifi_constants.h.
+4. Updated asix library to v0.5.8.
+
+Version 0.5.7 (2016-01-22)
+1. Fixed the wrong from ip value in ping command message.
+2. Update asix library to v0.5.7.
+3. Fixed wrong ip message while executing ping console command.
+4. Changed code allocation of main.c to ".text" section in project file and eliminated error message when entering debug mode.
+5. Changed image 2 offset from 0xb000 to 0x80000 in gen_board_img2.bat and default image will not be destroyed when upgrade OTA fireware via IAR+Jlink.
+6. Added wifi channel plan check in "wifi_ap" and "wifi_channel" console command and web page setting.
+7. Updated lib_wlan.a file in order to support 0x2A and 0x58 country code.
+
+Version 0.5.6 (2016-01-14)
+1. Solved the issue that device will crash under heavy traffic.
+2. Added an API, serial_getUartIndex().
+3. Applied the latest patch of uart flow control.
+4. Updated the monitor request to access the counters of RFC2217 if RFC2217 is selected in gudpbc.c.
+5. Added Xon/Xoff flow control between virtual COM(tcpdat.c/udpdat.c) and VSPD.
+6. Added RTS flow control in the direction of virtual COM to VSPD.
+7. Allowed control message and data message in same TCP/UDP package.
+8. Added IOCTL commands for RTS control.
+
+Version 0.5.5 (2015-12-28)
+1. Extended the detecting time to be 15 sec of default image reloading push button.
+2. Updated asix library to v0.5.5.
+3. Corrected the CLI commands description about pre-share key length to be 8~63 characters.
+4. Forbid the use of unsupported wifi security types in related modules.
+5. Auto configure the status both of DHCP server and DHCP client while swiching wifi mode.
+6. Changed the push button detecting method in gpio service module.
+
+Version 0.5.4 (2015-12-22)
+1. Updated lib_wlan.a and fixed the streaming function error in google nest api.
+2. Supported remoted data bits, stop bits and parity bit configuration in virtual COM mode.
+3. Immediately reply ACK frame if the TCP_PSH flag is setted within incoming TCP packet and fixed
+   throughput issue that using "Hyperterminal".
+4. Added the command to display the allocation table of dhcp server.
+5. Solved the issue that r2w runs as server using UDP protocol and the state is wrong. And the server socket
+   will be closed if it met error.
+6. Solved the issue that r2w runs as server using UDP protocol but it cannot work at VCOM mode.
+7. Drop received r2w packet if the application buffer will be overrun.
+8. Updated lib_platform.a and fixed link error issue in IAR Embedded workbench for ARM v7.50.
+
+Version 0.5.3 (2015-12-09)
+1. Fixed the issue of wrong Ethernet netword id in asix library.
+2. Reduced value of GTCPDAT_TIMEOUT and GUDPDAT_TIMEOUT to 1.
+3. Extended TCP TX/RX buffer size to be 1460*2/1460 bytes, UDP TX/RX buffer size to be 1472/1472*2 bytes.
+4. Chaged the configured way of serial port baudrate to be selection on WEB page.
+
+Version 0.5.2 (2015-12-02)
+1. Checking the UART Tx status by serial_writable() before putting every character.
+2. Checking the UART Rx status by serial_readable() before getting every character.
+3. Improved the timer accuracy issue in misc.c, httpdap.c and sntpc.c.
+4. Upgraded asix library to v0.5.2.
+5. Enabled the process after eFuse authentication fail, that will suspend all the registered tasks.
+6. Disabled the AX88796 interface and network backup switch mechanism in default.
+7. Changed the ota image file name and output folder, the new file path is 
+   "project\realtek_ameba1_va0_example\EWARM-RELEASE\OTA_firmware\ota_r2w.bin".
+8. Changed folder name "realtek_ameba1_va0_example" to "r2w".
+9. Changed chip name "AXM2300x" to "AXM23001".
+10. Fixed the bug of httpdap.c.
+11. Updated asix library.
+12. Added usage descriptions for some of console commands.
+14. Extended the pre-sharekey buffer size to 64 bytes in gconfig data structure.
+15. Disabled WPS/Simple config push button function under AP mode.
+16. Fixed the issue that console will show driver error message under AP mode if performing following commands:
+    wifi_channel, wifi_ssid, wifi_enc, wifi_keyid, wifi_wepkey and wifi_wpakey.
+17. Always starting DHCP client task after WPS/Simple config success.
+
+Version 0.5.1 (2015-11-12)
+1. Added the new DHCP server module, removed the original DHCP server module, and included in the library.
+2. Removed the cli command setotaname and added the command getotaname.
+3. Corrected the typo error of cli command setdstport().
+4. Added WiFi busy section in "wifi_connect", "wifi_connect_bssid" and "wifi_jbss" console commands for WiFi task coordination.
+5. Modified the default setting of JTAG interface to be disabled.
+6. Made some of definitions in HTTP server to be configurable, such as maximum connection number, maximum post count and maximum divide number.
+7. Updated mfilesys.exe to v2.3.1 to provid the optimized setting values of maximum post count and maximum divided number.
+8. Added MISC_DHCP() to start DHCP client that supports full function.
+9. Added a new header file gconf_ap.h to support that customers add the configuration for themself. And moved
+   some declarations to appropriate files in gconfig.h.
+10. Corrected the region domain/country code setting.
+11. Fixed wrong wifi channel setting issue on web page.
+12. Changed the buffers used in library either memory allocation or static allocated to the section .sdram.data.
+
+Version 0.5.0 (2015-11-02)
+1. Update realtek lib to v3.4c (lib_wlan.a/lib_wlan_mp.a)
+2. Updated ax_lib.a to v0.5.0.
+3. Removed file name setting in Advanced web page and display current upgrade image file name is Status web page.
+4. Enhanced firmware upload procedure to avoid multiple upload requests in same time.
+5. Fixed the compatibility issue about DOM function "getElementsByName()" in Status web page.
+6. Take off unnecessary GPIO reinit motions in gpios.c
+7. Enhanced firmware upgrading procedure.
+
+Version 0.4.1 (2015-10-19)
+1. Updated ax_lib.a to v0.4.1.
+2. Add semaphore mutex protection mechanism in WPS/Simple_Configure/ASIX_Auto_Reconnect.
+   (interactive related commands also sync this protection)
+3. Coordinate MP configuration data check/get flow between flash and efuse.
+4. Change LED indication of AP mode.
+   [0.4.0]
+   LED blinking: on(1 second) -> off(1 second) -> on(1 second) -> ...
+   [0.4.1]
+   LED blinking: on(2 second) -> off(2 second) -> on(2 second) -> ...
+5. Added uploaded file name check on Advanced web page.
+6. Supported the GUART_TX_LEVEL and GUART_RX_LEVEL in the GUART ISR for more efficiency.
+7. Modified the GUART_Init() with configured interrupt mode and TX/RX pin assignment.
+8. Moved the GAURT module into the library project.
+9. Fixed the close() error without free the current connection.
+
+Version 0.4.0 (2015-10-13)
+1. Based on SDK 3.4b.
+2. For virtual com mode, report the MODEM_STATUS_CHANGE value with check DCTS and DDSR.
+3. In gtcpdat_TcpXmitPacket(), update the transmitting buffer(.TxBufIndex) 
+   by the returned variable of the lwip send().
+4. Fix the select() timeout to 10ms in the TCP and UDP receiving function.
+5. When received the flow control packets of virtual com mode,
+   update the gconfig data structure for baudrate and HW flow control.
+6. Add GTCPDAT_GetUrTxBytes() & GTCPDAT_GetUrRxBytes() for AXR2W monitor function.
+7. Add GUDPDAT_GetUrTxBytes() & GUDPDAT_GetUrRxBytes() for AXR2W monitor function.
+8. In GUART_SetFlowControl(), configure the flow control by serial_set_flow_control().
+9. Add gudpbc_HandleMonitorReq() for AXR2W monitor function.
+10.Fix the gudpdat_UdpXmitPacket() to check the transmitting beffer length with the
+   GUDPDAT_TX_BUF_SIZE (1472).
+11. Supported the deltaCTS of modem status in tnCom.
+12. Reduced the initialization procedure of gudpbc module.
+13. Changed the declaration of buffer used in tftps.
+14. Added "misc.c" module for miscellaneous process in asix library.
+15. Sorted some constant string for reusable in HTTPAPI module.
+16. Added wifi auto reconnection to default SSID in station mode.
+17. Add simple config support through WPS button.
+18. Add LED indication for WIFI state.
+    [STA]
+    Disconnect: LED off
+    Connect: LED always on
+    [AP]
+    LED blinking: on(1 second) -> off(1 second) -> on(1 second) -> ...
+19. Update ping_test.c file for correct socket usage.
+
+20. Enhanced the auto-reconnection mechanism when device runs as an STA.
+21. Solved the ping function failure.
+
+Version 0.3.0 (2015-09-17)
+1. Based on SDK 3.4a.
+2. Added the modem status and line status of UART in tncom.
+3. Added the protection of shared global variables in lwip.
+4. Supported default firmware entering detection with on board push button.
+5. Supported eFuse authentication.
+6. Fixed the byte ordering issue in dhcp server.
+7. Added some modification of freeRTOS v8.2.1 to freeRTOS.
+8. Integrated the latest R2W module and fixes of lwip.
+9. Remodify the R2W transfer function that using one task to receive and
+   transmit packets with one socket. Use select() function to check the recv() for reading.
+10. Remodify the gtcpdat_GetUrData(), gtcpdat_TcpXmitPacket(), and
+   gtcpdat_TcpRecvPacketToUr() function referring to GTCPDAT_CONN_T information.
+11. Remodify the gudpdat_GetUrData(), gudpdat_UdpXmitPacket(), and
+   gudpdat_UdpRecvPacketToUr() function referring to GUDPDAT_CONN_T information.
+12. Fix the GCONFIG getting information for "WifiWepKeyIndex", "WifiWepKeyLength", 
+   "WifiWep64Key", and "WifiWep128Key".
+13. Fix the GCONFIG_GetConfigPacket() to reply the WiFi channel by checking STA or AP mode.
+14. Fix the GCONFIG_SetConfigPacket() to ignore the WiFi channel setting in STA mode.
+15. For virtual com mode, report the modem status before the data transmitting.
+16. Added modem status register value in status web page.
+17. Enhanced hash function and added periodic authentication every hour.
+18. Disabled console commands about concurrent mode.
+19. Corrected wifi region code definition.
+20. Upgraded mfilesys.exe to v2.3.0.
+21. Disable DHCP client after wifi connection is failed.
+22. Added the error handling codes in r2w module and fixed bugs.
+
+Version 0.2.2 (2015-08-26)
+1. Supported the check of wifi module from ASIX.
+2. Added dhcp server settings, startIp, endIp, and lease time.
+3. Extended the maximum number of NTP servers to three.
+4. Fixed the DHCP server cannot worked issue in AP mode.
+5. Removed the item ClientDestIp in GCONFIG_CFG_PKT and replaced with DestHostName.
+6. lwip update from v1.5.0 beta
+  2014-01-27: Simon Goldschmidt
+  * api_msg.c: fixed that SHUT_RD followed by SHUT_WR was different to SHUT_RDWR,
+    fixed return value of lwip_netconn_do_close on unconnected netconns
+  2015-01-17: Simon Goldschmidt
+  * sockets.c: fixed bug #43361 select() crashes with stale FDs
+  2014-02-20: Simon Goldschmidt
+  * api.h, sockets.c: fixed bug #41499 netconn::recv_avail can overflow
+  2014-09-02: Simon Goldschmidt
+  * sockets.c: fixed bug #42117 lwip_fcntl does not set errno
+  2014-12-17: Simon Goldschmidt
+  * tcp_out.c: fixed bug #43840 Checksum error for TCP_CHECKSUM_ON_COPY==1 for
+    no-copy data with odd length
+  2014-09-16: Simon Goldschmidt
+  * tcp_out.c: fixed bug #43192 tcp_enqueue_flags() should not check TCP_SND_QUEUELEN
+    when sending FIN
+  2014-01-18: Brian Fahs
+  * tcp_out.c: patch #8237: tcp_rexmit_rto fails to update pcb->unsent_oversize
+    when necessary
+  2014-09-02: Simon Goldschmidt
+  * tcp.c: fixed bug #42299 tcp_abort() leaves freed pcb on tcp_bound_pcbs list
+  2014-01-10: Simon Goldschmidt
+  * tcp.c: fixed bug #39898 tcp_fasttmr() possible lock due to infinte queue process loop
+  2014-04-08: Simon Goldschmidt
+  * tcp.c: Fixed bug #36167 tcp server crash when client closes (maximum window)
+  2014-04-06: Simon Goldschmidt
+  * tcp_in.c: Fixed bug #36210 lwIP does not elicit an empty ACK when received
+    unacceptable ACK
+  2014-02-25: Simon Goldschmidt, patch by Fatih Asici
+  * pbuf.c: fixed bug #39356 Wrong increment in pbuf_memfind()
+  2012-03-25: Simon Goldschmidt
+  * api_msg.c: Fixed bug #35817: do_connect() invalidly signals op_completed
+    for UDP/RAW with LWIP_TCPIP_CORE_LOCKING==1
+  2013-04-24: Simon Goldschmidt (patch by Emil Ljungdahl):
+  * netif.c: fixed bug #38586 netif_loop_output() "deadlocks"
+  2012-08-22: Simon Goldschmidt
+  * memp.c: fixed bug #37166: memp_sanity check loops itself
+  2014-12-19: Simon Goldschmidt
+  * opt.h, dhcp.h/.c: prevent dhcp from starting when netif link is down (only
+    when LWIP_DHCP_CHECK_LINK_UP==1, which is disabled by default for
+    compatibility reasons)
+  2014-02-27: Simon Goldschmidt
+  * dhcp.c: fixed bug #40303 DHCP xid renewed when sending a DHCPREQUEST
+  2012-08-13: Simon Goldschmidt
+  * dhcp.c: fixed bug #36645: Calling dhcp_release before dhcp_start
+    dereferences NULL
+  2012-08-13: Simon Goldschmidt
+  * dns.c: fixed bug #36899 DNS TTL 0 is cached for a long time
+
+Version 0.2.1 (2015-08-07)
+1. Added SNTP client and mcp7940 RTC driver.
+2. Added Si7006 temperature & humidity sensor(THS) driver.
+3. Changed "addheader.exe" and improve the signature(81958711) issue during firmware upgrade.
+4. Extended heap size to 120Kbytes and fixed WPS failed issue.
+5. Modified image2.icf and moved read only data of filesys_*.o to sdram.
+6. Added new workspace proj_ax_lib for library development.
+7. Add Country ID setting.
+8. Modified tnCom module to be built into ax_lib.
+9. Fix the GCONFIG_SetUrMode() to clear the .Network parameter refer to R2W mode.
+10. Remove the parameter .Timer of structure defined GTCPDAT_CONN_T & GUDPDAT_CONN_T.
+11. Fix the transmitting packets with a timeout that defined od each connection.
+   Use the .TxWaitTime to check the transmitting timeout checking.
+12. Fix gudpdat_UdpXmitPacket() to send data without 0 data length for normal socket mode.
+13. Add the API function, lwip_chksndqlen(), to check the sending buffer length.
+   This is used to support the R2W VCOM mode transfer.
+14. Modified the code and Add the function StartAsixAppTask to bring the tasks up in asix library.
+15. Moved the tftps module to asix library.
+16. Supported SSL secure message transmission for Email sending.
+17. Supported OAUTH2 authentication for SMTP server login.
+18. Added filename setting on WEB page.
+19. Changed the reference path of library header files to component\common\application\ax_lib.
+20. Added the exit path in the gtcpdat_ReceiveHandler() & gtcpdat_TransmitHandler().
+21. Removed the unused variables.
+22. In gtcpdat_ReceiveHandler(), fix the variable "newSocket" to u16 type.
+23. In GUART_Init(), set the flow control by getting the gconfig configuarion.
+24. In GUART_CopyAppToUrTx(), trigger the function to put characters by checking
+   if the urTxBufCount is not 0.
+25. Fixed the serial_irq_set() function to disable the RUART_IER_ETBEI.
+26. Supported STARTTLS command for SMTPS 25/587 port.
+27. Fixed the issue that gethostbyname() function couldn't accept the hostname notation like "10.1.4.1".
+28. Added new setting for serial operation mode and show relative humidity value on web page.
+29. Fixed the defferent subnet issue between static IP and DHCP server setting.
+30. Added Ethernet interface using AX88796C to lwip.
+31. Added network switching mechanism in library.
+32. Removed the "DeviceMulticastListenPort" of gconfig data structure.
+33. Added the "UrXmitDelay" of gconfig data structure and provide API function to get/set.
+34. For R2W TCP transfer, support sending characters to UART with a delay time.
+35. Added the protection of interrupt disable when access the parameters in the uart interrupt.
+36. Added the TX/RX tasks in guart module.
+37. Added the ALS module to support light sensor.
+
+Version 0.2.0 (2015-06-30)
+1. Based on SDK 3.3b.
+2. Add TFTP server for OTA.
+3. Add button for WPS.
+4. Add button for manufacture default settings of SW configuration and default image selected,
+   pressing either for 3 seconds or 8 seconds respectively.
+5. Add R2W mode setting, socket, vcom, or rfc2217.
+6. Add JtagOff setting to exit Jtag mode.
+7. Improve TFTP server.
+   * Check/reply correct block number
+   * Add timeout mechanism
+   * Enhance error handling
+   * Change realtek signature writing flow (write it to flash after validating checksum OK)
+   * Add block size / total size checking (support max block size = 1024 Bytes, max total size = 1.5 MBytes)
+   * Refer ota file name from GCONFIG
+8. Add default ota name in GCONFIG default.
+9. Add "setotaname" command for setting ota name.
+10. Sort out boot message of GCONFIG.
+11. Remodify the R2W application to support virtual com port of AXR2W utility
+12. Add some API, gtcpdat_TcpRecvPacketToUr(), gtcpdat_TcpXmitPacket(),
+   and gtcpdat_GetUrData() to use in TCP transmitting/receiving task.
+13. Add some API, gudpdat_UdpRecvPacketToUr(), gudpdat_UdpXmitPacket(),
+   and gudpdat_GetUrData() to use in UDP transmitting/receiving task.
+14. In GCONFIG module, check the R2W mode to show.
+15. Fix the byte order setting in GCONFIG_SetConfigPacket().
+16. Remove the element DeviceMulticastListenPort of GCONFIG data structure.
+17. Fix the the stop bit setting to 7 or 8.
+
+Version 0.1.0 (2015-05-26)
+1. Initial release and based on SDK 3.2a.

@@ -1,0 +1,150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Status</title>
+<link href="axcss0.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table id="head">
+<tr><td class="utt"><a href="http://www.asix.com.tw" target="mainFrame">http://www.asix.com.tw</a></td></tr>
+<tr><td id="mimg">
+<img src="img/Logo.jpg" alt="" width="67" height="62" />
+<img src="img/asix.gif" alt="" width="95" height="24" id="asix"/>
+<span id="corp">ELECTRONICS CORPORATION</span>
+<span id="devname">AXM23001 RS-232 to WiFi</span>
+</td></tr>
+<tr><td class="utt"><a href="index.htm">Logout</a></td></tr>
+<tr><td class="nvg">
+<ul>
+<li><a href="basic.htm">Basic</a></li>
+<li><a href="advanced.htm">Advanced</a></li>
+<li><a href="security.htm">Security</a></li>
+<li><a href="wifi.htm">WiFi</a></li>
+<li><a href="wifi_wz.htm">WiFi Wizard</a></li>
+<li><a href="rtc.htm">RTC</a></li>
+<li id="fucs"><a href="status.htm">Status</a></li>
+</ul>
+</td></tr>
+</table>
+<table id="ctent">
+<tr><td><div>System Status</div></td></tr>
+<tr><td><label>Device Name:</label><label id="stu0" style="width:400px">-</label></td></tr>
+<tr><td><label>Device IP Address:</label><label id="stu1" style="width:400px">-</label></td></tr>
+<tr><td><label>Firmware Version:</label><label id="stu2" style="width:400px">-</label></td></tr>
+<tr><td><label>WiFi MAC address(Hex):</label><label id="stu3" style="width:400px">-</label></td></tr>
+<tr><td><label>Modem Status(Hex):</label><label id="stu4" style="width:400px">-</label></td></tr>
+<tr><td><label>Protocol Type:</label><label id="stu5" style="width:400px">-</label></td></tr>
+<tr><td><label>Connection Status:</label><label id="stu6" style="width:400px">-</label></td></tr>
+<tr><td><label>Serial Port TX Count(Byte):</label><label id="stu7" style="width:400px">-</label></td></tr>
+<tr><td><label>Serial Port RX Count(Byte):</label><label id="stu8" style="width:400px">-</label></td></tr>
+<tr><td><label>Current Temperature(&degC):</label><label id="stu9" style="width:400px">-</label></td></tr>
+<tr><td><label>Current Relative Humidity(%):</label><label id="stu10" style="width:400px">-</label></td></tr>
+<tr><td><label>Current Date:</label><label id="stu11" style="width:400px">-</label></td></tr>
+<tr><td><label>Current Time:</label><label id="stu12" style="width:400px">-</label></td></tr>
+<tr><td><label>Image File Name:</label><label id="stu13" style="width:400px">-</label></td></tr>
+<tr><td><label>Cloud Connection Status:</label><label id="stu14" style="width:400px">-</label></td></tr>
+<tr><td class="btn">
+<input type="button" id="refresh_st" value="RefreshStart" style="width:120px" onclick="uiCtrl(this.value);"/>
+<input type="button" id="refresh_sp" value="RefreshStop" style="width:120px" onclick="uiCtrl(this.value);"/>
+</td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td bgcolor="#6c9fd2">&nbsp;<iframe id="ifr" src="hctent.htm?cmd=getstatus" style="visibility:hidden;position:absolute" tabIndex="-1"></iframe></td></tr>
+</table>
+<script src="axjs0.js" type="text/javascript"></script>
+<script language="JavaScript" type="text/javascript">
+<!--
+var rfTaskRuningFlag=0, rfTaskState=0, rfTaskTimeout, rfTimeId, rtcTime, rtcTimeUpdateStart=0;
+uiCtrl('RefreshStart');
+function uiCtrl(uiCmd){
+	if (uiCmd=='RefreshStart'){
+		document.getElementById('refresh_st').disabled = true;
+		document.getElementById('refresh_sp').disabled = false;
+	    rfTaskRuningFlag=1;
+		rfTaskState=0;
+		rfTask();
+	}else if (uiCmd=='RefreshStop'){
+		document.getElementById('refresh_st').disabled = false;
+		document.getElementById('refresh_sp').disabled = true;
+	    rfTaskRuningFlag=0;
+	    clearTimeout(rfTimeId);
+	}
+}
+function sendSrvCmd(srvCmd){
+		document.getElementById("ifr").setAttribute("src","hctent.htm?cmd="+srvCmd);
+}
+function rfTask(){
+	switch (rfTaskState){
+	case 0:
+		sendSrvCmd('getstatus');
+		rfTaskTimeout=30;
+		rfTaskState=1;
+		break;
+	case 1:
+		if (rfTaskTimeout){
+			rfTaskTimeout--;
+	}else{
+			uiCtrl('RefreshStop');
+			alert('Refresh failure! cannot get the status information from server.');
+			return;
+	}
+		break;
+	case 2:
+		if (rfTaskTimeout)
+			rfTaskTimeout--;
+		else
+			rfTaskState=0;
+		break;
+	default :
+		rfTaskState=0;
+		break;
+}
+	if (rfTaskRuningFlag)
+		rfTimeId=setTimeout('rfTask()', 1000);
+	if (rtcTimeUpdateStart==1)
+		rtcTimeUpdateStart++;
+	if (rtcTimeUpdateStart==2)
+		RtcUpdate();
+}
+function rcvfunc(eles){
+var i,show_vals,show_item;
+	if (eles[0] == null)
+		return;
+	show_vals = eles[0].value.split("&");
+	for (i=0; (show_vals[i]!=null)&&((show_item = document.getElementById("stu"+i))!=null); i++){
+		if (show_item.id=="stu12"){
+			if (!rtcTimeUpdateStart)
+				show_item.innerHTML = show_vals[i];
+			rtcTime = show_vals[i].split(':');
+		}else
+			show_item.innerHTML = show_vals[i];
+	}
+	if (rtcTimeUpdateStart==0)
+		rtcTimeUpdateStart++;
+	if (rfTaskState==1){
+		rfTaskState=2;
+		rfTaskTimeout=1;
+	}
+}
+function RtcUpdate(){
+	var rtcEle=document.getElementById("stu12");
+	if (rtcEle==null)
+		return;
+	if (rtcTime[2] == 59){
+		rtcTime[2] = 0;
+		if (rtcTime[1] == 59){
+			rtcTime[1] = 0;
+			if (rtcTime[0] == 23)
+				rtcTime[0] = 0;
+			else
+				rtcTime[0] ++;
+		}else
+			rtcTime[1] ++;
+	}else
+		rtcTime[2] ++;
+	rtcEle.innerHTML = rtcTime[0]+":"+rtcTime[1]+":"+rtcTime[2];
+}
+//-->
+</script>
+</body>
+</html>

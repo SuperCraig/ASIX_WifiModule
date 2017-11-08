@@ -1,0 +1,47 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>wifi_wz</title>
+<link href="axcss0.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table id="head">
+<tr><td class="utt"><a href="http://www.asix.com.tw" target="mainFrame">http://www.asix.com.tw</a></td></tr>
+<tr><td id="mimg">
+<img src="img/Logo.jpg" alt="" width="67" height="62" />
+<img src="img/asix.gif" alt="" width="95" height="24" id="asix"/>
+<span id="corp">ELECTRONICS CORPORATION</span>
+<span id="devname">AXM23001 RS-232 to WiFi</span>
+</td></tr>
+<tr><td class="utt"><a href="index.htm">Logout</a></td></tr>
+<tr><td class="nvg">
+<ul>
+<li><a href="basic.htm">Basic</a></li>
+<li><a href="advanced.htm">Advanced</a></li>
+<li><a href="security.htm">Security</a></li>
+<li><a href="wifi.htm">WiFi</a></li>
+<li id="fucs"><a href="wifi_wz.htm">WiFi Wizard</a></li>
+<li><a href="rtc.htm">RTC</a></li>
+<li><a href="status.htm">Status</a></li>
+</ul>
+</td></tr>
+</table>
+<table id="ctent">
+<tr><td align="center">
+<iframe src="wifiwz_svy.htm" scrolling="no" frameborder="0" height="600" width="100%" tabindex="-1"></iframe></td></tr>
+<form method="POST">
+  <tr><td><input name="Apply" style="visibility: hidden" type="submit" value="Apply"/></td></tr>
+</form>
+<tr><td>&nbsp;</td></tr>
+<tr><td bgcolor="#6c9fd2">&nbsp;</td></tr>
+</table>
+<script language="JavaScript" type="text/javascript">
+<!--
+function wifiWzReq(req){
+	location = "./wifi_wz.htm?"+req;
+}
+//-->
+</script>
+</body>
+</html>

@@ -1,0 +1,336 @@
+/*
+ ******************************************************************************
+ *     Copyright (c) 2016	ASIX Electronic Corporation      All rights reserved.
+ *
+ *     This is unpublished proprietary source code of ASIX Electronic Corporation
+ *
+ *     The copyright notice above does not evidence any actual or intended
+ *     publication of such source code.
+ ******************************************************************************
+ */
+ /*============================================================================
+ * Module Name: gs2w.c
+ * Purpose:
+ * Author:
+ * Date:
+ * Notes:
+ *
+ *=============================================================================
+ */
+
+/* INCLUDE FILE DECLARATIONS */
+#include "basic_types.h"
+#include "sockets.h"
+#include "api.h"
+#include "gconfig.h"
+#include "guart.h"
+#include "gs2w.h"
+#include "platform_opts.h"
+#include "modbus_gateway.h"
+#include "gtcpdat.h"
+
+/* NAMING CONSTANT DECLARATIONS */
+
+
+/* GLOBAL VARIABLES DECLARATIONS */
+GS2W_CMD_MODE GS2W_CmdMode;
+
+/* LOCAL VARIABLES DECLARATIONS */
+static u8	gs2w_State;
+static u8	gs2w_ConnType;
+extern serial_t    urObj;
+extern u32 GCONFIG_LibraryModule;
+
+u32 MBI_Baudrate;               // Craig 20170823
+u32 MBI_Baudrate_Temp;          // Craig 20170823
+/* LOCAL SUBPROGRAM DECLARATIONS */
+
+
+/* LOCAL SUBPROGRAM BODIES */
+//void CheckBaudrateChangeTask(void *param);     // Craig 20170823 
+
+/* EXPORTED SUBPROGRAM BODIES */
+/*
+ * ----------------------------------------------------------------------------
+ * Function: GS2W_Init()
+ * Purpose :
+ * Params  :
+ * Returns :
+ * Note    :
+ * ----------------------------------------------------------------------------
+ */
+void GS2W_Init(void)
+{
+  u16 temp16;
+  
+  /* Check maximum connections, if out of range, force maximum connections to 1 */
+  temp16 = GCONFIG_GetR2wMaxConnections();
+  if (temp16 < 1 || temp16 > GTCPDAT_MAX_CONNS)
+  {
+    GCONFIG_SetR2wMaxConnections(1);
+    GCONFIG_WriteConfigData();
+  }
+  gs2w_State = GS2W_STATE_IDLE;
+  temp16 = GCONFIG_GetNetwork();
+  
+#if CONFIG_HSUART_COMMAND_MODE
+  if ((temp16 & GCONFIG_NETWORK_R2WMODEMASK) != R2WMODE_MODBUS_GW)
+  {
+    memset(&GS2W_CmdMode, 0, sizeof(GS2W_CmdMode));
+    strcpy(GS2W_CmdMode.Pattern, "+++\r");
+  }
+#endif
+  
+  switch (temp16 & GCONFIG_NETWORK_R2WMODEMASK)
+  {
+  case R2WMODE_Socket:
+  case R2WMODE_VCom:
+    if (GCONFIG_GetJtagOff() && GCONFIG_GetRs485Status())
+    {
+      sys_jtag_off();
+      GUART_RS485Init(PE_2, RS485_DIR_LOW_RX);
+    }
+    GUART_Init(GUART_INTERRUPT_MODE, GUART_TX_PIN, GUART_RX_PIN);
+    if ((temp16 & GCONFIG_NETWORK_PROTO_TCP) == GCONFIG_NETWORK_PROTO_TCP)
+    {
+      gs2w_ConnType = GS2W_CONN_TCP;
+      GTCPDAT_Init();
+      
+      //xTaskCreate(CheckBaudrateChangeTask,"BaudrateChanged",500,NULL,1,NULL);           // Craig 20170823
+      GUDPDAT_Init(2400);//Ian test modify
+    }
+    //#if (GUDPDAT_INCLUDE)
+    //		else
+    //		{
+    //			gs2w_ConnType = GS2W_CONN_UDP;
+    //			GUDPDAT_Init();
+    //		}
+    //#endif //#if (GUDPDAT_INCLUDE)
+    break;
+    
+  case R2WMODE_MODBUS_GW:
+    if (GCONFIG_GetJtagOff() && GCONFIG_GetRs485Status())
+    {
+      sys_jtag_off();
+      GUART_RS485Init(PE_2, RS485_DIR_LOW_RX);
+    }
+    GUART_Init(GUART_INTERRUPT_MODE, GUART_TX_PIN, GUART_RX_PIN);
+    MBGW_Init();
+    break;
+  case R2WMODE_Rfc2217:
+    if (GCONFIG_LibraryModule & GCONFIG_RFC2217_MODULE)
+    {
+      TNCom_Init(&urObj, GCONFIG_GetDeviceDataPktListenPort());
+    }
+    break;
+  default:
+    break;
+  }
+  GUDPBC_Init();
+  printf("\n\r MBI_FW_Ver: 20170706a");//Ian test modify
+}
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function Name: GS2W_GetTaskState
+ * Purpose:
+ * Params:
+ * Returns:
+ * Note:
+ * ----------------------------------------------------------------------------
+ */
+u8 GS2W_GetTaskState(void)
+{
+	return gs2w_State;
+} /* End of GS2W_GetTaskState() */
+/*
+ * ----------------------------------------------------------------------------
+ * Function Name: GS2W_SetTaskState
+ * Purpose:
+ * Params:
+ * Returns:
+ * Note:
+ * ----------------------------------------------------------------------------
+ */
+void GS2W_SetTaskState(u8 state)
+{
+	gs2w_State = state;
+} /* End of GS2W_SetTaskState() */
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function Name: GS2W_GetConnType
+ * Purpose:
+ * Params:
+ * Returns:
+ * Note:
+ * ----------------------------------------------------------------------------
+ */
+u8 GS2W_GetConnType(void)
+{
+	return gs2w_ConnType;
+} /* End of GS2W_GetConnType() */
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function: u32 GS2W_CheckDestIP(void)
+ * Purpose :
+ * Params  :
+ * Returns :
+ * Note    :
+ * ----------------------------------------------------------------------------
+ */
+u32 GS2W_CheckDestIP(void)
+{
+	struct ip_addr	iHostAddr;
+	u32				ipDstDevice;
+	u8				pDstHostName[64];
+	u8				bDstNameLen;
+
+	bDstNameLen = GCONFIG_GetDestHostName(pDstHostName);
+	ipDstDevice = htonl(GCONFIG_IpAddr2Ulong(pDstHostName, bDstNameLen));
+	if (ipDstDevice == 0xFFFFFFFF) // Not a valid IP address
+	{
+		/* Execute a DNS query and get the host IP */
+		if (netconn_gethostbyname(pDstHostName, &iHostAddr) == ERR_OK)
+		{
+			ipDstDevice = htonl(iHostAddr.addr);
+		}
+		else
+		{
+			ipDstDevice = 0;
+		}
+	}
+
+	return ipDstDevice;
+
+} /* End of GS2W_CheckDestIP()*/
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function: int GS2W_CongestionCheck()
+ * Purpose :
+ * Params  :
+ * Returns :
+ * Note    :
+ * ----------------------------------------------------------------------------
+ */
+u8 GS2W_CongestionCheck(u16 apPort, u16 length)
+{
+  u16 apNetMode;
+
+	apNetMode = GCONFIG_GetNetwork();
+	if (((apNetMode & GCONFIG_NETWORK_R2WMODEMASK) == R2WMODE_Rfc2217 ||
+		(apNetMode & GCONFIG_NETWORK_PROTO_TCP)) &&
+		(apPort == GCONFIG_GetDeviceDataPktListenPort()) &&
+		(GUART_GetXmitEmptyCount() < length))
+	{
+		printf("Congestion detected\r\n");
+		return 1;
+	}
+	return 0;
+
+} /* End of GS2W_CongestionCheck()*/
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function: u8 GS2W_CmdModeSwitchCheck()
+ * Purpose :
+ * Params  :
+ * Returns :
+ * Note    :
+ * ----------------------------------------------------------------------------
+ */
+u8 GS2W_CmdModeSwitchCheck(GS2W_CMD_MODE *pCmdMode, u8 *pStr, u16 len)
+{
+	u16 i;
+	u32	TickTime, ElapseTime;
+
+	if ((pStr == 0) || (len == 0) || (pCmdMode->Enable != 0))
+	{
+		return 0;
+	}
+
+	/* Timeout check */
+	if (pCmdMode->MatchedIndex)
+	{
+		TickTime = xTaskGetTickCount();
+		if (TickTime >= pCmdMode->LastTime)
+		{
+			ElapseTime = TickTime - pCmdMode->LastTime;
+		}
+		else
+		{
+			ElapseTime = portMAX_DELAY - pCmdMode->LastTime + TickTime;
+		}
+
+		if ((ElapseTime * portTICK_RATE_MS) >= 5000)
+		{
+			pCmdMode->MatchedIndex = 0;
+		}
+	}
+
+	/* Comparing switching string */
+	for (i = 0; i < len; i++)
+	{
+		if (pCmdMode->Pattern[pCmdMode->MatchedIndex] == pStr[i])
+		{
+			pCmdMode->LastTime = xTaskGetTickCount();
+			pCmdMode->MatchedIndex++;
+			if (pCmdMode->Pattern[pCmdMode->MatchedIndex] == '\0')
+			{
+				pCmdMode->MatchedIndex = 0;
+				pCmdMode->Enable = 1;
+				serial_clear(&urObj);//Clear TX/RX FIFO
+				printf("Switching to command mode\r\n");
+				return 1;
+			}
+		}
+		else
+		{
+			pCmdMode->MatchedIndex = 0;
+			break;
+		}
+	}
+	return 0;
+
+} /* End of GS2W_CmdModeSwitchCheck() */
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function: u8 GS2W_CmdModeIsEnable()
+ * Purpose :
+ * Params  :
+ * Returns :
+ * Note    :
+ * ----------------------------------------------------------------------------
+ */
+u8 GS2W_CmdModeIsEnable(GS2W_CMD_MODE *pCmdMode)
+{
+	return pCmdMode->Enable;
+
+} /* End of GS2W_CmdModeIsEnable()*/
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function: void CheckBaudrateChangeTask()
+ * Purpose :
+ * Params  :
+ * Returns :
+ * Note    :Added by Craig 20170823
+ * ----------------------------------------------------------------------------
+ */
+//void CheckBaudrateChangeTask(void *param){
+//  GUDPDAT_Init(MBI_Baudrate);//Ian test modify
+//  while(1){
+//    if(MBI_Baudrate != 0 && MBI_Baudrate!= MBI_Baudrate_Temp){
+//      //GUDPDAT_Close(0);
+//      SetBaudrate(MBI_Baudrate);
+//      MBI_Baudrate_Temp = MBI_Baudrate;
+//      printf("Buadrate changed!");
+//    }
+//    vTaskDelay( 1000/portTICK_RATE_MS ); 
+//  }
+//}
+
+/* End of gs2w.c */

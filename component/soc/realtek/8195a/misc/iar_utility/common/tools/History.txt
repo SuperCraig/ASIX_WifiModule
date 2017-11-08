@@ -1,0 +1,14 @@
+//======================================================================
+// Ameba Add Header Uility Revision History
+//
+// This document describes the major changes, additions and bug fixes made 
+// to Add Header Uility between released versions. 
+//======================================================================
+Version 0.2.1 (2016-07-15)
+1. Check the value of length field within image2 header, ensure the total file size equal or large than image2 size.
+
+Version 0.2.0 (2015-06-26)
+1. Changed the signature field from 0x3831393538373131 to 0xffffffffffffffff.
+
+Version 0.1.0 (2015-05-13)
+1. Initial release

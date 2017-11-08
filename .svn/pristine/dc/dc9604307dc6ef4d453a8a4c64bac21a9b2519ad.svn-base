@@ -1,0 +1,74 @@
+/*
+ *********************************************************************************
+ *     Copyright (c) 2015   ASIX Electronic Corporation      All rights reserved.
+ *
+ *     This is unpublished proprietary source code of ASIX Electronic Corporation
+ *
+ *     The copyright notice above does not evidence any actual or intended
+ *     publication of such source code.
+ *********************************************************************************
+ */
+/*================================================================================
+ * Module Name : gudpdat.h
+ * Purpose     : 
+ * Author      : 
+ * Date        :
+ * Notes       :
+ *================================================================================
+ */
+#ifndef GUDPDAT_H
+#define GUDPDAT_H
+
+/* INCLUDE FILE DECLARATIONS */
+#include "semphr.h"
+
+/* NAMING CONSTANT DECLARATIONS */
+#define GUDPDAT_STACK_SIZE			1024
+#define GUDPDAT_MAX_CONNS			1
+#define GUDPDAT_TX_BUF_SIZE			1472
+#define GUDPDAT_RX_BUF_SIZE			(1472 * 2)
+#define GUDPDAT_TIMEOUT				1
+#define GUDPDAT_XOFF_TIMEOUT		30000//msec
+
+
+#define GUDPDAT_STATE_FREE			0
+#define GUDPDAT_STATE_ACTIVE		1
+#define	GUDPDAT_STATE_CONNECTED		2
+#define GUDPDAT_NO_NEW_CONN			0xFF
+
+
+/* TYPE DECLARATIONS */
+typedef struct _GUDPDAT_CONN_T
+{
+	u8		Id;
+	u8		State;
+	u32		RemoteIp;
+	u16		RemotePort;
+	s16		Socket;
+    u32		TxWaitTime;
+	u32		UrRxBytes;
+    u32		UrTxBytes;
+    u16		TxBufIndex;
+    u8		*TxBuf;
+	u8		FlowControlXonRx;
+	u32		FlowControlXonLastTime;		
+	u8		FlowControlModemStatus;
+	u8		FlowControlModemCtrl;
+	u8		FlowControlVirModemStatus;
+	xSemaphoreHandle	AccessProtection;
+} GUDPDAT_CONN_T;
+
+
+/* GLOBAL VARIABLES */
+
+
+/* EXPORTED SUBPROGRAM SPECIFICATIONS */
+void GUDPDAT_Init(void);
+s32 GUDPDAT_GetUrTxBytes(u8 connId);
+s32 GUDPDAT_GetUrRxBytes(u8 connId);
+s32 GUDPDAT_GetConnStatus(u8 connId);
+s16 GUDPDAT_Connect(u8 connId, u32 DestIp, u16 DestPort);
+s16 GUDPDAT_Close(u8 connId);
+s16 GUDPDAT_IsManualConnectionMode(void);
+
+#endif /* End of GUDPDAT_H */

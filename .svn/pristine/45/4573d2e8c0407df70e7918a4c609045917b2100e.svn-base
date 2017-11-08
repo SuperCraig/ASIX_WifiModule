@@ -1,0 +1,399 @@
+/*
+ ******************************************************************************
+ *     Copyright (c) 2015	ASIX Electronic Corporation      All rights reserved.
+ *
+ *     This is unpublished proprietary source code of ASIX Electronic Corporation
+ *
+ *     The copyright notice above does not evidence any actual or intended
+ *     publication of such source code.
+ ******************************************************************************
+ */
+ /*============================================================================
+ * Module Name: gudpbc.c
+ * Purpose:
+ * Author:
+ * Date:
+ * Notes:
+ *
+ *=============================================================================
+ */
+
+/* INCLUDE FILE DECLARATIONS */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "sockets.h"
+#include "rtl8195a.h"
+#include "gconfig.h"
+#include "gudpbc.h"
+#include "guart.h"
+#include "gs2w.h"
+#include "gtcpdat.h"
+#include "gudpdat.h"
+#include "tncom.h"
+#include <string.h>
+#include "modbus_gateway.h"
+#include "MBI_ASIXTask.h"
+#include "gconf_ap.h"
+   
+/* NAMING CONSTANT DECLARATIONS */
+/* GLOBAL VARIABLES DECLARATIONS */
+static GCONFIG_CFG_PKT		*pConfigRxPkt;
+static u8					macAddr[6] = {0};
+static GCONFIG_MONITOR_PKT	*pMonitorPkt;
+
+/* LOCAL VARIABLES DECLARATIONS */
+xTaskHandle		gudpbc_CfgHandleTask = NULL; 
+static s16		gudpbc_SocketFD;
+static u8		*pBcRcvrBuf;
+static struct sockaddr_in	gudpbc_SourAddr;
+static struct sockaddr_in	gudpbc_DestAddr;
+
+//extern 
+extern xQueueHandle UDPTxQueue;	
+extern xQueueHandle UDPRxQueue;
+
+
+/* LOCAL SUBPROGRAM DECLARATIONS */
+static void gudpbc_HandleSearchReq(GCONFIG_CFG_PKT *pConfigPkt, int sd, struct sockaddr_in *destAddr);
+static void gudpbc_HandleSetReq(GCONFIG_CFG_PKT *pConfigPkt, int sd, struct sockaddr_in *destAddr);
+static void gudpbc_HandleResetReq(GCONFIG_CFG_PKT *pConfigPkt, int sd, struct sockaddr_in *destAddr);
+static void gudpbc_HandleRebootReq(GCONFIG_CFG_PKT *pConfigPkt, int sd, struct sockaddr_in *destAddr);
+static void gudpbc_RebootDevice(void);
+static void gudpbc_HandleMonitorReq(int sd, struct sockaddr_in *destAddr);
+
+
+/* LOCAL SUBPROGRAM BODIES */
+/*
+ * ----------------------------------------------------------------------------
+ * Function Name: gudpbc_mbi_udp_tx
+ * Purpose: 
+ * Params:
+ * Returns:
+ * Note:
+ * ----------------------------------------------------------------------------
+ */
+static void gudpbc_mbi_udp_tx(u8 *buf, size_t bsize, int sd, struct sockaddr_in *destAddr)
+{	
+	sendto(sd, (u8 *)buf, bsize, 0, (struct sockaddr *)destAddr, sizeof(struct sockaddr_in));
+
+} /* End of gudpbc_mbi_udp_tx() */
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function Name: gudpbc_HandleSearchReq
+ * Purpose: 
+ * Params:
+ * Returns:
+ * Note:
+ * ----------------------------------------------------------------------------
+ */
+static void gudpbc_HandleSearchReq(GCONFIG_CFG_PKT *pConfigPkt, int sd, struct sockaddr_in *destAddr)
+{	
+	GCONFIG_GetConfigPacket(pConfigPkt);
+ 	pConfigPkt->Opcode = GCONFIG_OPCODE_SEARCH_ACK;
+	sendto(sd, (u8 *)pConfigPkt, sizeof(GCONFIG_CFG_PKT), 0, (struct sockaddr *)destAddr, sizeof(struct sockaddr_in));
+
+} /* End of gudpbc_HandleSearchReq() */
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function Name: gudpbc_HandleSetReq
+ * Purpose: 
+ * Params:
+ * Returns:
+ * Note:
+ * ----------------------------------------------------------------------------
+ */
+static void gudpbc_HandleSetReq(GCONFIG_CFG_PKT *pConfigPkt, int sd, struct sockaddr_in *destAddr)
+{
+	u8 reboot = (pConfigPkt->Option & GCONFIG_OPTION_ENABLE_REBOOT);
+
+	GCONFIG_SetConfigPacket(pConfigPkt);
+	pConfigPkt->Opcode = GCONFIG_OPCODE_SET_ACK;
+	sendto(sd, (u8 *)pConfigPkt, sizeof(GCONFIG_CFG_PKT), 0, (struct sockaddr *)destAddr, sizeof(struct sockaddr_in));
+
+	if (reboot == GCONFIG_OPTION_ENABLE_REBOOT)
+	{
+		gudpbc_RebootDevice();
+	}
+} /* End of gudpbc_HandleSetReq() */
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function Name: gudpbc_HandleResetReq
+ * Purpose: 
+ * Params:
+ * Returns:
+ * Note:
+ * ----------------------------------------------------------------------------
+ */
+static void gudpbc_HandleResetReq(GCONFIG_CFG_PKT *pConfigPkt, int sd, struct sockaddr_in *destAddr)
+{
+	u8 reboot = (pConfigPkt->Option & GCONFIG_OPTION_ENABLE_REBOOT);
+	
+	GCONFIG_ReadDefaultConfigData();
+	GCONFIG_WriteConfigData();
+	GCONFIG_GetConfigPacket(pConfigPkt);
+ 	pConfigPkt->Opcode = GCONFIG_OPCODE_RESET_ACK;
+	sendto(sd, (u8 *)pConfigPkt, sizeof(GCONFIG_CFG_PKT), 0, (struct sockaddr *)destAddr, sizeof(struct sockaddr_in));
+
+	if (reboot == GCONFIG_OPTION_ENABLE_REBOOT)
+	{
+		gudpbc_RebootDevice();
+	}	
+} /* End of gudpbc_HandleResetReq() */
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function Name: gudpbc_HandleRebootReq
+ * Purpose: 
+ * Params:
+ * Returns:
+ * Note:
+ * ----------------------------------------------------------------------------
+ */
+static void gudpbc_HandleRebootReq(GCONFIG_CFG_PKT *pConfigPkt, int sd, struct sockaddr_in *destAddr)
+{
+	pConfigPkt->Opcode = GCONFIG_OPCODE_REBOOT_ACK;
+	sendto(sd, (u8 *)pConfigPkt, sizeof(GCONFIG_CFG_PKT), 0, (struct sockaddr *)destAddr, sizeof(struct sockaddr_in));
+	gudpbc_RebootDevice();
+} /* End of gudpbc_HandleRebootReq() */
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function Name: gudpbc_RebootDevice
+ * Purpose: Delay 10 ms before reboot
+ * Params:
+ * Returns:
+ * Note:
+ * ----------------------------------------------------------------------------
+ */
+static void gudpbc_RebootDevice(void)
+{
+	// Set processor clock to default before system reset
+	HAL_WRITE32(SYSTEM_CTRL_BASE, 0x14, 0x00000021);
+	osDelay(100);
+
+	// Cortex-M3 SCB->AIRCR
+	HAL_WRITE32(0xE000ED00, 0x0C, (0x5FA << 16) |                             // VECTKEY
+	                              (HAL_READ32(0xE000ED00, 0x0C) & (7 << 8)) | // PRIGROUP
+	                              (1 << 2));                                  // SYSRESETREQ
+	while(1) osDelay(1000);
+} /* End of gudpbc_RebootDevice() */
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function Name: gudpbc_HandleMonitorReq
+ * Purpose: 
+ * Params:
+ * Returns:
+ * Note:
+ * ----------------------------------------------------------------------------
+ */
+static void gudpbc_HandleMonitorReq(int sd, struct sockaddr_in *destAddr)
+{
+	pMonitorPkt = (GCONFIG_MONITOR_PKT *)pBcRcvrBuf;
+
+	pMonitorPkt->Gid = GCONFIG_Gid;
+	pMonitorPkt->Opcode = GCONFIG_OPCODE_MONITOR_ACK;
+	pMonitorPkt->ModemStatus = serial_raed_msr(&urObj);
+	strcpy((char *)pMonitorPkt->VerStr , GCONFIG_VERSION_STRING);
+	switch (GCONFIG_GetNetwork() & GCONFIG_NETWORK_R2WMODEMASK)
+	{
+	case R2WMODE_Socket:
+	case R2WMODE_VCom:
+	default:
+		if (GS2W_GetConnType() == GS2W_CONN_TCP)
+		{
+			pMonitorPkt->TxBytes = GTCPDAT_GetUrTxBytes(0);
+			pMonitorPkt->RxBytes = GTCPDAT_GetUrRxBytes(0);
+		}
+		else
+		{
+			pMonitorPkt->TxBytes = GUDPDAT_GetUrTxBytes(0);
+			pMonitorPkt->RxBytes = GUDPDAT_GetUrRxBytes(0);
+		}
+		break;	  
+	case R2WMODE_Rfc2217:
+		TNCOM_GetRxTxCounter(&pMonitorPkt->RxBytes, &pMonitorPkt->TxBytes);
+		break;
+	case R2WMODE_MODBUS_GW:
+		MBGW_GetRxTxCounter(0, &pMonitorPkt->RxBytes, &pMonitorPkt->TxBytes);
+		break;		
+	}
+	sendto(sd, (u8 *)pMonitorPkt, sizeof(GCONFIG_MONITOR_PKT), 0, (struct sockaddr *)destAddr, sizeof(struct sockaddr_in));
+
+} /* End of gudpbc_HandleMonitorReq() */
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function: gudpbc_ConfigHandle()
+ * Purpose :
+ * Params  :
+ * Returns :
+ * Note    :
+ * ----------------------------------------------------------------------------
+ */
+static void gudpbc_ConfigHandle(void *param)
+{
+	s16		recvLen;
+	u16		iAddrSize = sizeof(struct sockaddr_in);
+	s16		bValidReq = FALSE;
+
+    //struct in_addr     addr;
+    u32_t   *addr;
+    portBASE_TYPE xQueueStatus;
+    u16      udp_tx_len;
+    u8      i, *p_temp;      
+	pConfigRxPkt = (GCONFIG_CFG_PKT *)pBcRcvrBuf;
+	while (1)
+	{
+		recvLen = recvfrom(gudpbc_SocketFD, pBcRcvrBuf, sizeof(GCONFIG_CFG_PKT), 0,
+					   (struct sockaddr *)&gudpbc_DestAddr, (socklen_t *)&iAddrSize);
+        
+        if (recvLen != 0){ //Ian test modify; check udp length
+            printf("\n\r UDP_receive: Len = %d", recvLen);
+            printf("\n\r UDP_receive: SrcAddr = %x ", gudpbc_DestAddr.sin_addr);  
+        }
+         
+        addr = (u32_t *)&gudpbc_DestAddr.sin_addr;
+        //IAR can't u32_t addr = gudpbc_DestAddr.sin_addr; or addr = (u32_t)gudpbc_DestAddr.sin_addr;
+
+        //192.168.1.102 ; addr = 0x6601A8C0      ;//port only 25122 (config set)
+        //if ((*addr&0xff000000) == 0xff000000) {//Ian test modify only broadcast active
+            if ((recvLen > 40)&&(memcmp(&GCONFIG_Gid, pBcRcvrBuf, sizeof(GCONFIG_GID)) == 0)){
+                //printf("\n\r UDP broadcast receive: Len = %d", recvLen);                
+                memcpy(&UDPRxBuffer, pBcRcvrBuf, recvLen);     
+                
+                //cmd12 : need sw set, now fw testing byself
+                if (UDPRxBuffer[37] == 0x12){                  
+                  IPv4_IPv6Address1_Cmd13[0] = *addr &0xff;
+                  IPv4_IPv6Address1_Cmd13[1] = (*addr >> 8) &0xff;;
+                  IPv4_IPv6Address1_Cmd13[2] = (*addr >> 16) &0xff;;
+                  IPv4_IPv6Address1_Cmd13[3] = (*addr >> 24) &0xff;
+                  IP_PortNo_Cmd13 = GCONFIG_UDP_BCAST_SERVER_PORT;
+                }
+                
+                //printf("\n\r UDP_rx_data: %x %x %x", UDPRxBuffer[0], UDPRxBuffer[1], UDPRxBuffer[2]);
+                xQueueStatus = xQueueSendToBack(UDPRxQueue,&recvLen,1);
+
+            }
+        //}
+        
+		if(uxQueueMessagesWaiting(UDPTxQueue)==0){            
+			//vPrintString("Queue normal should have been empty!\r\n");
+            xQueueStatus = xQueueReceive(UDPTxQueue,&udp_tx_len,100);
+            if(xQueueStatus == pdPASS){
+                //gudpbc_HandleSearchReq(pConfigRxPkt, gudpbc_SocketFD, &gudpbc_DestAddr);//for search test
+                gudpbc_mbi_udp_tx(&UDPTxBuffer[0], udp_tx_len, gudpbc_SocketFD, &gudpbc_DestAddr);
+                printf("\r\n xUDPTxStatus send pass! %d", udp_tx_len);    
+            }
+                    
+		}
+        
+        
+        /*
+        if (recvLen == 9 || recvLen == sizeof(GCONFIG_CFG_PKT)) // 9: search request packet
+		{
+			if (memcmp(&GCONFIG_Gid, pBcRcvrBuf, sizeof(GCONFIG_GID)) == 0) // Valid data
+			{
+				memcpy(macAddr, GCONFIG_GetMacAddress(), 6);
+				if (memcmp(pConfigRxPkt->MacAddr, macAddr, sizeof(macAddr)) == 0)
+				{
+					bValidReq = TRUE;
+				}
+
+				switch (pConfigRxPkt->Opcode)
+				{
+					case GCONFIG_OPCODE_SEARCH_REQ:
+						gudpbc_HandleSearchReq(pConfigRxPkt, gudpbc_SocketFD, &gudpbc_DestAddr);
+						break;
+
+					case GCONFIG_OPCODE_SET_REQ:
+						if (bValidReq)
+							gudpbc_HandleSetReq(pConfigRxPkt, gudpbc_SocketFD, &gudpbc_DestAddr);
+						break;
+
+					case GCONFIG_OPCODE_RESET_REQ:
+						if (bValidReq)
+							gudpbc_HandleResetReq(pConfigRxPkt, gudpbc_SocketFD, &gudpbc_DestAddr);
+						break;
+
+					case GCONFIG_OPCODE_REBOOT_REQ:
+						if (bValidReq)
+							gudpbc_HandleRebootReq(pConfigRxPkt, gudpbc_SocketFD, &gudpbc_DestAddr);
+						break;
+					case GCONFIG_OPCODE_MONITOR_REQ:
+						gudpbc_HandleMonitorReq(gudpbc_SocketFD, &gudpbc_DestAddr);
+						break;
+
+					default:
+						break;
+				}
+			}
+		}
+        */
+	}
+
+//	gudpbc_CfgHandleTask = NULL;
+//	vTaskDelete(NULL);
+}
+
+
+/* EXPORTED SUBPROGRAM BODIES */
+
+/*
+ * ----------------------------------------------------------------------------
+ * Function: GUDPBC_Init()
+ * Purpose :
+ * Params  :
+ * Returns :
+ * Note    :
+ * ----------------------------------------------------------------------------
+ */
+void GUDPBC_Init(void)
+{
+	u16	iAddrSize = sizeof(struct sockaddr_in);
+
+	pBcRcvrBuf = pvPortMalloc(sizeof(GCONFIG_CFG_PKT));
+	if (pBcRcvrBuf)
+		memset(pBcRcvrBuf, 0, sizeof(GCONFIG_CFG_PKT));
+	else
+		return;
+	memset(&gudpbc_SourAddr, 0, sizeof(struct sockaddr_in));
+	memset(&gudpbc_DestAddr, 0, sizeof(struct sockaddr_in));
+
+	gudpbc_SourAddr.sin_family = AF_INET;
+	gudpbc_SourAddr.sin_len = sizeof(struct sockaddr_in);
+	gudpbc_SourAddr.sin_port = htons(GCONFIG_GetDeviceBroadcastListenPort());
+	gudpbc_SourAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+	
+	// creating a UDP socket
+	if ((gudpbc_SocketFD = socket(AF_INET, SOCK_DGRAM, 0)) < 0)
+	{
+		printf("\n\rR2W: create udp config socket fd error!");
+		vPortFree(pBcRcvrBuf);
+		pBcRcvrBuf = NULL;
+		return;
+	}
+	// binding the UDP socket to the UDP server address
+	if (bind(gudpbc_SocketFD, (struct sockaddr *)&gudpbc_SourAddr, iAddrSize) < 0)
+	{
+		printf("\n\rR2W: bind udp config socket fd error! ");
+		vPortFree(pBcRcvrBuf);
+		pBcRcvrBuf = NULL;
+		close(gudpbc_SocketFD);
+		return;
+	}
+	
+	/* Creat the UDP configuration receive handle function */
+	if(xTaskCreate(gudpbc_ConfigHandle, "gudpbc_config_handle", GUDPBC_STACK_SIZE, NULL, tskIDLE_PRIORITY + 1, &gudpbc_CfgHandleTask) != pdPASS)
+	{
+		printf("\n\rUART ERROR: Create UDP configuration handle failed.");
+		close(gudpbc_SocketFD);
+		vPortFree(pBcRcvrBuf);
+		pBcRcvrBuf = NULL;
+	}
+}
+
+/* End of gudpbc.c */

@@ -1,0 +1,51 @@
+[Stack]
+FillEnabled=0
+OverflowWarningsEnabled=1
+WarningThreshold=90
+SpWarningsEnabled=1
+WarnLogOnly=1
+UseTrigger=1
+TriggerName=main
+LimitSize=0
+ByteLimit=50
+[PlDriver]
+MemConfigValue=C:\Users\craig.chen\Desktop\AXM23001_RS-232-to-Wifi_Firmware_v0.7.5_Source\HSAt13Ver\project\r2w\EWARM-RELEASE\..\..\..\component\soc\realtek\8195a\misc\iar_utility\common\8195a.ddf
+[Jet]
+DisableInterrupts=0
+MultiCoreRunAll=0
+LeaveRunning=0
+[ArmDriver]
+EnableCache=1
+[Exceptions]
+StopOnUncaught=_ 0
+StopOnThrow=_ 0
+[JLinkDriver]
+CStepIntDis=_ 0
+LeaveTargetRunning=_ 0
+TraceBufferSize=0x00010000
+TraceStallIfFIFOFull=0x00000000
+TracePortSize=0x00000004
+[SfrWindow]
+Show=1 1
+Sort=4 0
+[DebugChecksum]
+Checksum=1052031633
+[Trace1]
+Enabled=0
+ShowSource=1
+[TermIOLog]
+LoggingEnabled=_ 0
+LogFile=_ ""
+[Log file]
+LoggingEnabled=_ 0
+LogFile=_ ""
+Category=_ 0
+[Disassemble mode]
+mode=0
+[Breakpoints2]
+Bp0=_ 1 "EMUL_CODE" "{$PROJ_DIR$\..\..\..\component\common\application\gs2w\MBI_CommandProcess.h}.35.1" 0 0 1 "" 0 "" 0
+Count=1
+[Aliases]
+A0=_ "vectors.S" ""
+Count=1
+SuppressDialog=0

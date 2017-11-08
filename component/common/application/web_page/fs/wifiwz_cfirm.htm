@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>wifiwz_cfirm</title>
+<style type="text/css">
+<!--
+body{background-color:#EDEFEF;}
+.wz{position:relative;width:700px;margin:0 auto 20px auto;padding:0;}
+.wz table{width:650px;margin:0 auto 0 auto;border-style:none;table-layout:fixed;border-collapse:collapse;font:0.33cm Verdana,Geneva,sans-serif;color:#036;text-align:left;}
+.wz th{font:0.6cm Verdana,Geneva,sans-serif;color:#036;text-align:center;padding-bottom:20px;}
+.info{width:600px;margin:0 auto 0 auto;padding: 0;position:relative;}
+.info form{display:inline;}
+.info table{width:100%;border-style:none;border-collapse:collapse;text-align:left;font:0.33cm Verdana,Geneva,sans-serif;color:#036;background-color:#EDEFEF;}
+.info td{padding-top:10px;}
+.info label{width:30%;float:left;}
+.info .btn{text-align:right;}
+.info .btn input{width:100px;display:inline;margin:5px 0 5px 10px;}
+.errMsg0{font:0.33cm Arial, Helvetica, sans-serif;color:#F00;}
+-->
+</style></head>
+<body>
+<div class="wz">
+<table>
+<tr><th>Your WiFi network settings are as below</th></tr>
+<tr><td><label>You can press "Accept" button to take effect.</label></td></tr>
+</table>
+</div>
+<div class="info">
+<table>
+<tr><td><label>Sevice Area Name/SSID:</label><span></span></td></tr>
+<tr><td><label>AP Channel:</label><span></span></td></tr>
+<tr><td><label>Security Mode:</label><span></span></td></tr>
+<form method="POST" target="_parent" onsubmit="return chkForm(this);">
+<tr><td><label>DHCP Client:</label>
+<select name="wz_dhcpc">
+<option value="0" selected >Disable</option>
+<option value="1"          >Enable</option>
+</select></td></tr>
+<tr><td><label>Static IP Address:</label><input name="wz_static_ip" type="text" value="192.168.0.3" maxlength="15" /></td></tr>
+<tr><td><label>Static Default Gateway:</label><input name="wz_gateway_ip" type="text" value="192.168.0.1" maxlength="15" /></td></tr>
+<tr><td><label>Static Subnet Mask:</label><input name="wz_mask" type="text" value="255.255.255.0" maxlength="15" /></td></tr>
+<tr><td><label>Static DNS Server:</label><input name="wz_dns_ip" type="text" value="168.95.1.1" maxlength="15" /></td></tr>
+<tr><td class="btn">
+<input type="submit" name="Accept" value="Accept"/></form>
+<form method="POST" target="_self"><input type="submit" name="Cancel" value="Cancel"/></form>
+</td></tr>
+</table>
+</div>
+<div class="wz">
+<table>
+<tr><th style="color:red;text-align:left;font-size:0.4cm;">WARNING! You may lost the device if it connects to a different WiFi network.</th></tr>
+</table>
+</div>
+<script src="axjs0.js" type="text/javascript"></script>
+<script language="JavaScript" type="text/javascript">
+<!--
+var wifi_info = document.getElementById('wifi_info');
+var spans = document.getElementsByTagName('span');
+window.onload = function(){
+var values, i;
+	if (wifi_info && spans){
+		if (wifi_info.value){
+			values = wifi_info.value.split('&');
+			for (i=0; i<spans.length; i++)
+			{
+				if (values[i]==null)
+					break;
+				spans[i].innerHTML = values[i];
+			}
+		}
+	}
+}
+
+//-->
+</script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+
+#ifndef MBI_ASIXTask_H
+#define MBI_ASIXTask_H
+
+#include <stdint.h>                      /* standard types definitions                      */
+#include <MBI_CommandProcess.h>
+#include <MBI_CommandIdentify.h>
+
+
+void MBI_Init(void);
+
+
+
+#endif /* xxx_H */
+
+
+
+

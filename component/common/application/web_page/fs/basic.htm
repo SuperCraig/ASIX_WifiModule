@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Basic</title>
+<link href="axcss0.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table id="head">
+<tr><td class="utt"><a href="http://www.asix.com.tw" target="mainFrame">http://www.asix.com.tw</a></td></tr>
+<tr><td id="mimg">
+<img src="img/Logo.jpg" alt="" width="67" height="62" />
+<img src="img/asix.gif" alt="" width="95" height="24" id="asix"/>
+<span id="corp">ELECTRONICS CORPORATION</span>
+<span id="devname">AXM23001 RS-232 to WiFi</span>
+</td></tr>
+<tr><td class="utt"><a href="index.htm">Logout</a></td></tr>
+<tr><td class="nvg">
+<ul>
+<li id="fucs"><a href="basic.htm">Basic</a></li>
+<li><a href="advanced.htm">Advanced</a></li>
+<li><a href="security.htm">Security</a></li>
+<li><a href="wifi.htm">WiFi</a></li>
+<li><a href="wifi_wz.htm">WiFi Wizard</a></li>
+<li><a href="rtc.htm">RTC</a></li>
+<li><a href="status.htm">Status</a></li>
+</ul>
+</td></tr>
+</table>
+<table id="ctent">
+<form method="POST" onsubmit="return chkForm(this);">
+<tr><td><div>Serial Settings</div></td></tr>
+<tr><td><label>Device Name:</label><input name="dsm_name" type="text" value="DSM1" maxlength="16" /></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Device name can be up to 16 characters.</td></tr>
+<tr><td><label>Data Baud Rate:</label>
+<select name="dbr">
+<option value="0" selected >921600</option>
+<option value="1"          >115200</option>
+<option value="2"          >57600</option>
+<option value="3"          >38400</option>
+<option value="4"          >19200</option>
+<option value="5"          >9600</option>
+<option value="6"          >4800</option>
+<option value="7"          >2400</option>
+<option value="8"          >1200</option>
+</select></td></tr>
+<tr><td><label>Data Bits:</label>
+<select name="data">
+<option value="0" selected >7</option>
+<option value="1"          >8</option>
+</select></td></tr>
+<tr><td><label>Data Parity:</label>
+<select name="parity">
+<option value="0" selected >None</option>
+<option value="1"          >Odd</option>
+<option value="2"          >Even</option>
+</select></td></tr>
+<tr><td><label>Stop Bits:</label>
+<select name="stop">
+<option value="0" selected >1</option>
+<option value="1"          >2</option>
+</select></td></tr>
+<tr><td><label>Flow Control:</label>
+<select name="flow">
+<option value="0" selected >None</option>
+<option value="1"          >RTS+CTS</option>
+</select></td></tr>
+<tr><td><label>RS485:</label>
+<select name="rs485">
+<option value="0" selected >Disable</option>
+<option value="1"          >Enable</option>
+</select></td></tr>
+<tr><td><div>Serial to Network Settings</div></td></tr>
+<tr><td><label>Operation Mode:</label>
+<select name="s2n_mode">
+<option value="0" selected >Socket</option>
+<option value="1"          >VCOM</option>
+<option value="2"          >RFC2217</option>
+<option value="3"          >MODBUS Gateway</option>
+</select></td></tr>
+<tr><td><label>Connection Type:</label>
+<select name="conntype">
+<option value="0" selected >TCP</option>
+<option value="1"          >UDP</option>
+</select></td></tr>
+<tr><td><label>Transmit Timer (ms):</label><input name="txtimer" type="text" value="100" maxlength="5" /></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Please enter an integer between 10~65535.</td></tr>
+<tr><td><label>Server/Client Mode:</label>
+<select name="cs_mode">
+<option value="0" selected >Server</option>
+<option value="1"          >Client</option>
+</select></td></tr>
+<tr><td><label>Server Listening Port:</label><input name="s_lstport" type="text" value="5000" maxlength="5" /></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Please enter an integer between 1024~65535.</td></tr>
+<tr><td><label>TCP Server Connections:</label><select name="r2w_conns">
+<option value="0" selected >1</option>
+<option value="1"          >2</option>
+<option value="2"          >3</option>
+<option value="3"          >4</option>
+</select></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>This is effective only for TCP server under Socket or VCOM mode.</td></tr>
+<tr><td><label>Client Destination Host Name/IP:</label><input name="c_deshn" type="text" value="asix.com.tw" maxlength="35" style="width:40%;"/></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Please enter host name or IP address(e.g. asix.com.tw or 10.4.1.100).</td></tr>
+<tr><td><label>Client Destination Port:</label><input name="c_desport" type="text" value="5000" maxlength="5" /></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Please enter an integer between 1024~65535.</td></tr>
+<tr><td><label>Client Connection Mode:</label><select name="cliconnmode" style="width:40%;">
+<option value="0" selected >Auto Connection</option>
+<option value="1"          >Manual Connection</option>
+</select></td></tr>
+<tr><td><div>Static IP Settings</div></td></tr>
+<tr><td><label>Static IP Address:</label><input name="static_ip" type="text" value="192.168.0.3" maxlength="15" /></td></tr>
+<tr><td><label>Static Default Gateway:</label><input name="gateway_ip" type="text" value="192.168.0.1" maxlength="15" /></td></tr>
+<tr><td><label>Static Subnet Mask:</label><input name="mask" type="text" value="255.255.255.0" maxlength="15" /></td></tr>
+<tr><td><label>Static DNS Server:</label><input name="dns_ip" type="text" value="168.95.1.1" maxlength="15" /></td></tr>
+<tr><td><div>DHCP Settings</div></td></tr>
+<tr><td><label>DHCP Client:</label>
+<select name="dhcpc">
+<option value="0" selected >Disable</option>
+<option value="1"          >Enable</option>
+</select></td></tr>
+<tr><td><label>DHCP Server:</label>
+<select name="dhcps">
+<option value="0" selected >Disable</option>
+<option value="1"          >Enable</option>
+</select></td></tr>
+<tr><td><label>DHCP Server IP Pool Start:</label><input name="dhcps_startip" type="text" value="192.168.0.4" maxlength="15" /></td></tr>
+<tr><td><label>DHCP Server IP Pool End:</label><input name="dhcps_endip" type="text" value="192.168.0.10" maxlength="15" /></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Note that the end pool must be larger than start pool,<br>and their net ID must be equal.</td></tr>
+<tr><td><label>DHCP Default Gateway:</label><input name="dhcps_gw" type="text" value="192.168.0.3" maxlength="15" /></td></tr>
+<tr><td><label>DHCP Server Lease Time(minutes):</label><input name="dhcps_lt" type="text" value="1440" maxlength="5" /></td></tr>
+<tr><td>&nbsp;</td></tr>
+<tr><td class="btn">
+<input name="Save" type="submit" value="Save"/>
+<input name="Apply" type="submit" value="Apply" onclick="confirmType='submitAndReboot'"/>
+<input name="Cancel" type="reset" value="Cancel" />
+</td></tr>
+</form>
+<tr><td>&nbsp;</td></tr>
+<tr><td bgcolor="#6c9fd2">&nbsp;</td></tr>
+</table>
+<script src="axjs0.js" type="text/javascript"></script>
+<script language="JavaScript" type="text/javascript">
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+"E:\Embedded Workbench 7.2\arm\bin\armproc.dll" 
+
+"E:\Embedded Workbench 7.2\arm\bin\armjlink.dll" 
+
+"E:\hsinhua_iar\ver_0817\project\r2w\EWARM-RELEASE\Debug\Exe\application.axf" 
+
+--plugin "E:\Embedded Workbench 7.2\arm\bin\armbat.dll" 
+
+--macro "E:\hsinhua_iar\ver_0817\project\r2w\EWARM-RELEASE\..\..\..\component\soc\realtek\8195a\misc\iar_utility\common\preload.mac" 
+
+--flash_loader "E:\hsinhua_iar\ver_0817\project\r2w\EWARM-RELEASE\tmp.board" 
+
+
+
+

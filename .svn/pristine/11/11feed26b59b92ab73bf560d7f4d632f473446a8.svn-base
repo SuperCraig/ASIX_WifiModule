@@ -1,0 +1,112 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Security</title>
+<link href="axcss0.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<table id="head">
+<tr><td class="utt"><a href="http://www.asix.com.tw" target="mainFrame">http://www.asix.com.tw</a></td></tr>
+<tr><td id="mimg">
+<img src="img/Logo.jpg" alt="" width="67" height="62" />
+<img src="img/asix.gif" alt="" width="95" height="24" id="asix"/>
+<span id="corp">ELECTRONICS CORPORATION</span>
+<span id="devname">AXM23001 RS-232 to WiFi</span>
+</td></tr>
+<tr><td class="utt"><a href="index.htm">Logout</a></td></tr>
+<tr><td class="nvg">
+<ul>
+<li><a href="basic.htm">Basic</a></li>
+<li><a href="advanced.htm">Advanced</a></li>
+<li id="fucs"><a href="security.htm">Security</a></li>
+<li><a href="wifi.htm">WiFi</a></li>
+<li><a href="wifi_wz.htm">WiFi Wizard</a></li>
+<li><a href="rtc.htm">RTC</a></li>
+<li><a href="status.htm">Status</a></li>
+</ul>
+</td></tr>
+</table>
+<table id="ctent">
+<form method="POST" onsubmit="return chkForm(this);">  
+<tr><td><div>Change Username Setting</div></td></tr>
+<tr><td><label>New Username:</label><input name="new_usn" type="text" value="" maxlength="15" /></td></tr>
+<tr><td class="btn">
+<input name="Apply" type="submit" value="Apply" onclick="confirmType='changeUsername'"/>
+<input name="Cancel" type="reset" value="Cancel"/>
+</td></tr>
+</form>
+<form method="POST" onsubmit="return chkForm(this);">     
+<tr><td><div>Change Password Setting</div></td></tr>
+<tr><td><label>Old Password:</label><input name="old_psw" type="password" value="" maxlength="15" /></td></tr>
+<tr><td><label>New Password:</label><input name="new_psw" type="password" value="" maxlength="15" /></td></tr>
+<tr><td><label>Confirm Password:</label><input name="cfm_psw" type="password" value="" maxlength="15" /></td></tr>
+<tr><td class="btn">
+<input name="Apply" type="submit" value="Apply" onclick="confirmType='changePassword'"/>
+<input name="Cancel" type="reset" value="Cancel"/>
+</td></tr>
+</form>
+<form method="POST" onsubmit="return chkForm(this);">     
+<tr><td><div>Change SMTP Username & Password Setting</div></td></tr>
+<tr><td><label>Username:</label><input name="smtp_un" type="text" value="" maxlength="35" style="width:40%;" /></td></tr>
+<tr><td><label>Password:</label><input name="smtp_pw" type="password" value="" maxlength="35"  style="width:40%;" /></td></tr>
+<tr><td class="btn">
+<input name="Save" type="submit" value="Save"/>
+<input name="Apply" type="submit" value="Apply" onclick="confirmType='submitAndReboot'"/>
+<input name="Cancel" type="reset" value="Cancel"/>
+</td></tr>
+</form>
+<form method="POST" onsubmit="return chkForm(this);">     
+<tr><td><div>Google Nest Setting</div></td></tr>
+<tr><td><label>Server URL/HostName:</label><input name="gn_host" type="text" value="" maxlength="64" style="width:40%;" /></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Please enter firebase id(e.g. xxx.firebaseio.com).</td></tr>
+<tr><td class="btn">
+<input name="Save" type="submit" value="Save"/>
+<input name="Apply" type="submit" value="Apply" onclick="confirmType='submitAndReboot'"/>
+<input name="Cancel" type="reset" value="Cancel"/>
+</td></tr>
+</form>
+<form method="POST" onsubmit="return chkForm(this);">     
+<tr><td><div>Bluemix Setting</div></td></tr>
+<tr><td><label>Server HostName:</label><input name="bm_host" type="text" value="" maxlength="63" style="width:40%;" /></td></tr>
+<tr><td><label>Username:</label><input name="bm_un" type="text" value="" maxlength="31" style="width:40%;" /></td></tr>
+<tr><td><label>Password:</label><input name="bm_pw" type="password" value="" maxlength="31" style="width:40%;" /></td></tr>
+<tr><td><label>Organization ID:</label><input name="bm_orgid" type="text" value="" maxlength="6"/></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Length must be 6 bytes.</td></tr>
+<tr><td><label>Type ID:</label><input name="bm_typid" type="text" value="" maxlength="5"/></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Length must be 5 bytes.</td></tr>
+<tr><td><label>Device ID:</label><input name="bm_devid" type="text" value="" maxlength="11"/></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Length must be 11 bytes.</td></tr>
+<tr><td><label>API Version:</label><input name="bm_apiver" type="text" value="" maxlength="12" /></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Length should be less than or equal to 12 bytes.</td></tr>
+<tr><td><label>API Key:</label><input name="bm_apikey" type="text" value="" maxlength="32" style="width:40%;"/></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Length should be less than or equal to be 32 bytes.</td></tr>
+<tr><td><label>API Token:</label><input name="bm_apitoken" type="text" value="" maxlength="32" style="width:40%;"/></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Length should be less than or equal to be 32 bytes.</td></tr>
+<tr><td class="btn">
+<input name="Save" type="submit" value="Save"/>
+<input name="Apply" type="submit" value="Apply" onclick="confirmType='submitAndReboot'"/>
+<input name="Cancel" type="reset" value="Cancel"/>
+</td></tr>
+</form>
+<form method="POST" onsubmit="return chkForm(this);">     
+<tr><td><div>Azure Setting</div></td></tr>
+<tr><td><label>Server HostName:</label><input name="az_host" type="text" value="" maxlength="64" style="width:40%;" /></td></tr>
+<tr><td><label>HUB name:</label><input name="az_hn" type="text" value="" maxlength="32" style="width:40%;" /></td></tr>
+<tr><td><label>Device ID:</label><input name="az_di" type="text" value="" maxlength="11" style="width:40%;" /></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Length must be 11 bytes, where is serial number.</td></tr>
+<tr><td><label>Device Keys:</label><input name="az_sk" type="password" value="" maxlength="64" style="width:40%;" /></td></tr>
+<tr><td><label>Expire Time:</label><input name="az_et" type="text" value="" maxlength="10" style="width:40%;" /></td></tr>
+<tr><td class="prmt"><label>&nbsp;</label>Length must be 10 bytes, where is timestamp in UNIX form.</td></tr>
+<tr><td class="btn">
+<input name="Save" type="submit" value="Save"/>
+<input name="Apply" type="submit" value="Apply" onclick="confirmType='submitAndReboot'"/>
+<input name="Cancel" type="reset" value="Cancel"/>
+</td></tr>
+</form>
+<tr><td>&nbsp;</td></tr>
+<tr><td bgcolor="#6c9fd2">&nbsp;</td></tr>
+</table>
+<script src="axjs0.js" type="text/javascript"></script>
+</body>
+</html>

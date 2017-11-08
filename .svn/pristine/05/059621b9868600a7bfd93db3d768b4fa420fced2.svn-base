@@ -1,0 +1,15 @@
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5_2\arm\bin\armproc.dll" 
+
+"C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5_2\arm\bin\armjlink2.dll" 
+
+"C:\Users\craig.chen\Desktop\AXM23001_RS-232-to-Wifi_Firmware_v0.7.5_Source\HSAt13Ver\project\r2w\EWARM-RELEASE\Debug\Exe\application.axf" 
+
+--plugin "C:\Program Files (x86)\IAR Systems\Embedded Workbench 7.5_2\arm\bin\armbat.dll" 
+
+--macro "C:\Users\craig.chen\Desktop\AXM23001_RS-232-to-Wifi_Firmware_v0.7.5_Source\HSAt13Ver\project\r2w\EWARM-RELEASE\..\..\..\component\soc\realtek\8195a\misc\iar_utility\common\preload.mac" 
+
+--flash_loader "C:\Users\craig.chen\Desktop\AXM23001_RS-232-to-Wifi_Firmware_v0.7.5_Source\HSAt13Ver\project\r2w\EWARM-RELEASE\tmp.board" 
+
+
+
+

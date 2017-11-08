@@ -1,0 +1,167 @@
+//======================================================================
+// AXM23001 RS232-to-WiFi Reference Design
+// Application Library Revision History
+//
+// This document describes the major changes, additions and bug fixes made 
+// to the Application Library between released versions. 
+/=======================================================================
+Version 0.7.2 (2017-03-06)
+1. Updated httpd module.
+2. Supported REST command entry in httpd module.
+3. Enhanced axhttpc module to read data fragmentarily from SSL buffer.
+
+Version 0.7.1 (2016-12-21)
+1. Enhance network backup function as below 4 modes:
+   - Force WIFI
+   - Force Ethernet
+   - WIFI as major
+   - Ethernet as major
+note: Wifi AP mode and DHCP server will be turned off while ethernet linked.
+2. Add MISC_NetInterfaceReadyCheck() for checking link under backup mode.
+3. Enhanced axhttpc module.
+4. Consider ethernet ID in MISC_DHCP().
+
+Version 0.7.0 (2016-11-02)
+1. Added a new API, TNCOM_CopyUrRxToApp, and moved TNCom_Init() from library to GS2W_Init().
+2. Supported dual-image architecture.
+3. Fixed the issue of wrong serial number that get from efuse in misc module.
+
+Version 0.6.8 (2016-10-06)
+1. Changed the allocation of GUART TX/RX buffers and prevent memory overlap.
+
+Version 0.6.7 (2016-09-26)
+1. Enhance firmware upgrade check in TFTP as following:
+   - Unreasonable firmware file size
+   - Take off old image2 offset judgement, image2 offset should equal to 0x80000
+2. Supported checkbox component in HTTPAPI_SetElementValueById() and HTTPAPI_GetElementValueById() API functions.
+3. Change firmware upgrade method for TFTP server.
+   Old: packet -> flash
+   New: packet -> image buffer -> flash
+4. Provide file checking mechanism for TFTP server.
+
+Version 0.6.6 (2016-08-02)
+1. Added SetTimeout() api for axhttpc module.
+
+Version 0.6.5 (2016-07-06)
+1. Added axhttpc module.
+
+Version 0.6.4 (2016-06-17)
+1. fixed the issue that some library functions can not work while the WiFi is turned off.
+
+Version 0.6.3 (2016-06-13)
+1. Allowed developer to obtain MAC address and serial number at initial stage.
+
+Version 0.6.2 (2016-04-29)
+1. Fixed the issue about quickly switch WEB page, the WEB server will be closed.
+
+Version 0.6.1 (2016-04-15)
+1. Supported URL decodeing on HTTPAPI_GetElementValueByName() for CGI request.
+
+Version 0.6.0 (2016-03-30)
+1. Added "modbus" and "modbus_tcp" modules.
+2. Fixed wrong data initialization in MODBUS_Allocate().
+3. Corrected wrong data length to be sent in MODBUS_SlaveSend().
+4. Supported to receive cascaded modbus tcp frame.
+5. Close oldest modebus tcp connection when a new connection request arrive and no more available connection in pool.
+6. Fixed data contention issue for data transmission in modebus serial module.
+
+Version 0.5.9 (2016-03-01)
+1. Supported the console function using HSUART interface.
+2. Added the function to switch to the command mode of HSUART application if the pattern matched.
+3. Redesigned the tnCom about new connection incoming to solve the issue more connections than supported.
+
+Version 0.5.8 (2016-01-26)
+1. Supported polarity selection for RS485 RX direction control pin.
+
+Version 0.5.7 (2016-01-22)
+1. Supported RS485 transfer direction control signal.
+2. Enhanced wifi power limit in CE and MKK certification before set country id.
+
+Version 0.5.6 (2016-01-14)
+1. Added the option of RFC2217 flow control, SetRTS, that enabled the hardware flow control.
+2. Enhanced the performance of guart.c.
+3. Added a function to calculate the performance according to baud rate in tncom.c.
+4. Added the API TNCOM_GetRxTxCounter() to access the counters both tx and rx.
+5. Added the API GUART_ControlRTSSignal() to control the RTS signal.
+6. Avoid to accessing UART Tx/Rx data after GUART module initialization.
+
+Version 0.5.5 (2015-12-28)
+1. DHCP server connection timeout changed to 10 seconds.
+2. Registered the DHCP server task to the authentication process.
+3. Enhanced the performance of tncom and added the new APIs, TNCOM_PutRxString() and TNCOM_GetRxString().
+4. Enlarged the guart buffers, tx buffer to 16K and rx buffer to 8K.
+5. Fixed auto-reconnection error issue if switching wifi mode to station dynamically.
+6. Added authentication check in GUART.c
+7. Forbid the use of unsupported wifi security types in startentry.c.
+8. Enhanced the performance of RFC2217 at Tx side.
+
+Version 0.5.4 (2015-12-17)
+1. Forbided DHCP server re-initialization while the chip is unauthenticated.
+2. Added the API to access the allocation table of dhcp server.
+3. Change the buffer size of tncom both of tx/rx to 1460.
+
+Version 0.5.3 (2015-12-09)
+1. Fixed the issue of wrong Ethernet netword id in asix library.
+2. Extended UART0 TX/RX buffer size to be 2*2048/2*2048 bytes.
+
+Version 0.5.2 (2015-12-02)
+1. Fixed the request block issue in sntpc.c.
+2. Migrated network backup switch routine into misc.c library module.
+3. Changed the allocation of some of buffers to .sdram.data section in httpdapi.c, httpd.c and smtpc.c library module.
+4. Added module status check in SMTP and SNTP module to avoid wrong process.
+5. Made the value of auto-reconnected interval and disconnection check timeout to be configurable.
+6. Fixed the bug of tnCom.c.
+7. Cleanup the source.
+8. Fixed wrong value issue of "error_flag" in MISC_DHCP() function under AP mode.
+9. Fixed wrong wifi auto reconnection when MISC_DHCP() is timeout under STATION mode.
+
+Version 0.5.1 (2015-11-12)
+1. Added DHCP server module.
+2. Made some of definitions in HTTP server to be configurable, such as maximum connection number, maximum post count and maximum divide number.
+3. Fixed wrong allocated size of socket number to connection id mapping buffer in httpd.c.
+4. Added new DHCP control function and fixed the issue that cannot performing renew and rebinding in original control function.
+5. Changed the buffers used in library either memory allocation or static allocated to the section .sdram.data.
+   The files are modified as following, tncom.c, tftps.c, dhcpsrv.c, and guart.c.
+
+Version 0.5.0 (2015-11-02)
+1. Fixed an issue that TFTP server does not report session timeout to client.
+2. Fixed an issue that TFTP server does not reply last block ACK sometimes.
+3. Do not check file name in TFTP server but save file name into GCONFIG while
+   update success.
+4. Provided api functions for firmware upgrading coordination.
+5. Added "Periodic" callback function for additional action and login expire time process in httpd server.
+6. Add protection code into TFTP server for firmware upgrading coordination.
+7. Added a callback function which will be called once a new request is connected.
+
+Version 0.4.1 (2015-10-19)
+1. Added "mpconfig" module for serial number getting.
+2. Added the guart module.
+
+Version 0.4.0 (2015-10-12)
+1. Based on SDK v3.4b.
+2. Supported the deltaCTS of modem status in tnCom.
+3. Changed the declaration of buffer used in tftps.
+4. Added "misc.c" module for miscellaneous process in asix library.
+5. Sorted some constant string for reusable in HTTPAPI module.
+6. Added wifi auto reconnection to default SSID in station mode.
+7. Enhanced the auto-reconnection mechanism when device runs as an STA.
+
+Version 0.3.0 (2015-09-17)
+1. Based on SDK v3.4a.
+2. Added modem status and line status notification in tncom.c.
+3. Supported default firmware entering detection with on board push button.
+4. Supported eFuse authentication.
+5. Fixed the byte ordering issue in dhcp server.
+6. Added ".sdram.text" code section name in asix library project and fixed the memory not enough space issue.
+7. Updated the tncom that the packets send/receive in one task.
+8. Enhanced hash function and added periodic authentication every hour.
+7. Added the error handling code when socket send failed.
+
+Version 0.2.0 (2015-08-14)
+1. Added the verification of Wifi module ASIX made.
+2. Added network backup switching mechanism in library.
+3. Updated the dhcp server initialization.
+4. Changed the prefix in some of HTTP api functions.
+
+Version 0.1.0 (2015-07-15)
+1. Initial release.

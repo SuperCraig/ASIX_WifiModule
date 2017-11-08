@@ -1,0 +1,37 @@
+[Stack]
+FillEnabled=0
+OverflowWarningsEnabled=1
+WarningThreshold=90
+SpWarningsEnabled=1
+WarnLogOnly=1
+UseTrigger=1
+TriggerName=main
+LimitSize=0
+ByteLimit=50
+[PlDriver]
+MemConfigValue=D:\Ameba_R2W_fw\AXM2300x_R2Wifi_Firmware_v0.3.0_Source_0828_34a\project\realtek_ameba1_va0_example\EWARM-RELEASE\..\..\..\component\soc\realtek\8195a\misc\iar_utility\common\8195a.ddf
+[Jet]
+DisableInterrupts=0
+MultiCoreRunAll=0
+[ArmDriver]
+EnableCache=1
+[Exceptions]
+StopOnUncaught=_ 0
+StopOnThrow=_ 0
+[JLinkDriver]
+CStepIntDis=_ 0
+[Log file]
+LoggingEnabled=_ 0
+LogFile=_ ""
+Category=_ 0
+[TermIOLog]
+LoggingEnabled=_ 0
+LogFile=_ ""
+[Disassemble mode]
+mode=0
+[Breakpoints2]
+Count=0
+[Aliases]
+A0=_ "vectors.S" ""
+Count=1
+SuppressDialog=0

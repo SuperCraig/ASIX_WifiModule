@@ -1,0 +1,70 @@
+/*
+ ******************************************************************************
+ *     Copyright (c) 2015	ASIX Electronic Corporation      All rights reserved.
+ *
+ *     This is unpublished proprietary source code of ASIX Electronic Corporation
+ *
+ *     The copyright notice above does not evidence any actual or intended
+ *     publication of such source code.
+ ******************************************************************************
+ */
+/*=============================================================================
+ * Module Name:gudpbc.h
+ * Purpose:
+ * Author:
+ * Date:
+ * Notes:
+ *
+ *=============================================================================
+ */
+
+#ifndef __GUDPBC_H__
+#define __GUDPBC_H__
+
+/* INCLUDE FILE DECLARATIONS */
+/* NAMING CONSTANT DECLARATIONS */
+#define	GUDPBC_STACK_SIZE	1024
+#define	GUDPBC_TIMEOUT		2 //second
+
+#define GCONFIG_OPCODE_SEARCH_REQ		0x0E
+#define GCONFIG_OPCODE_SEARCH_ACK		0x01
+#define GCONFIG_OPCODE_SET_REQ			0x02
+#define GCONFIG_OPCODE_SET_ACK			0x03
+#define GCONFIG_OPCODE_SET_DENY			0x04
+#define GCONFIG_OPCODE_UPGRADE_REQ		0x05
+#define GCONFIG_OPCODE_UPGRADE_ACK		0x06
+#define GCONFIG_OPCODE_UPGRADE_DENY		0x07
+#define GCONFIG_OPCODE_RESET_REQ		0x08
+#define GCONFIG_OPCODE_RESET_ACK		0x09
+#define GCONFIG_OPCODE_RESET_DENY		0x0A
+#define GCONFIG_OPCODE_REBOOT_REQ		0x0B
+#define GCONFIG_OPCODE_REBOOT_ACK		0x0C
+#define GCONFIG_OPCODE_REBOOT_DENY		0x0D
+#define GCONFIG_OPCODE_MONITOR_REQ		0x10
+#define GCONFIG_OPCODE_MONITOR_ACK		0x11
+#define GCONFIG_OPCODE_CONN_CLOSE		0x12
+#define GCONFIG_OPCODE_NONE				0xFF
+
+#define GCONFIG_OPTION_ENABLE_REBOOT	0x01
+#define GCONFIG_VERSION_STR_LEN         14
+
+/* TYPE DECLARATIONS */
+typedef struct _GCONFIG_MONITOR_PKT
+{
+	GCONFIG_GID	Gid;
+	u8			Opcode;
+	u8			ModemStatus;
+	u8			VerStr[GCONFIG_VERSION_STR_LEN];
+	u32			TxBytes;
+	u32			RxBytes;
+} GCONFIG_MONITOR_PKT;
+
+/* GLOBAL VARIABLES */
+
+/* EXPORTED SUBPROGRAM SPECIFICATIONS */
+void GUDPBC_Init(void);
+
+
+#endif /* End of __GUDPBC_H__ */
+
+/* End of gudpbc.h */
